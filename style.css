@@ -427,6 +427,8 @@ body {
   padding: 28px 24px;
   border: 1px solid var(--border);
   width: 35%;
+  min-width: 320px;
+  max-width: 95vw;
 }
 .modal-box.wide {
   max-width: 620px;
@@ -1502,6 +1504,7 @@ body {
   }
   .modal-box,
   .modal-box.wide {
+    width: 92vw !important;
     padding: 20px 16px;
   }
   .modal-title {
