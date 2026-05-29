@@ -672,6 +672,41 @@
           padding: 80px 16px 50px !important;
         }
       }
+      @media (max-width: 768px) {
+        /* City select compact */
+        #idxCityWrap {
+          max-width: 80px !important;
+        }
+        #idxCitySelect {
+          width: 70px !important;
+          font-size: 10px !important;
+          padding: 5px 4px !important;
+        }
+
+        /* Sign In / Register compact */
+        #navRight .btn {
+          padding: 6px 10px !important;
+          font-size: 11px !important;
+          letter-spacing: 0 !important;
+        }
+
+        /* nav-right */
+        .nav-right {
+          flex-shrink: 0;
+          gap: 4px !important;
+          overflow: visible !important;
+        }
+      }
+
+      @media (max-width: 480px) {
+        #idxCityWrap {
+          display: none !important; /* city hide - hamburger menu ma already che */
+        }
+        #navRight .btn {
+          padding: 5px 8px !important;
+          font-size: 10px !important;
+        }
+      }
       /* .footer-tagline {
         font-size: 13px;
         color: var(--muted);
