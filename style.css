@@ -474,6 +474,7 @@ body {
   font-weight: 800;
   letter-spacing: 0.5px;
   margin-bottom: 4px;
+  white-space: nowrap;
 }
 .modal-subtitle {
   font-size: 14px;
@@ -1501,10 +1502,11 @@ body {
   }
   .modal-box,
   .modal-box.wide {
-    padding: 18px 14px;
+    padding: 20px 16px;
   }
   .modal-title {
     font-size: 22px;
+    white-space: nowrap;
   }
   .table-header-bar {
     padding: 10px 10px;
