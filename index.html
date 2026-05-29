@@ -676,6 +676,10 @@
           gap: 4px !important;
           overflow: visible !important;
         }
+        .nav-hamburger {
+          margin-left: 0 !important; /* ← આ add કરો */
+          flex-shrink: 0 !important; /* ← આ add કરો */
+        }
       }
       /* Small Mobile 480px */
       @media (max-width: 480px) {
@@ -804,21 +808,20 @@
           <a class="nav-link" href="#" onclick="showComing()">Offers</a>
         </div>
       </div>
-      <div class="nav-right">
-        <div id="navRight"></div>
-        <button
-          class="nav-hamburger"
-          id="hamburgerBtn"
-          onclick="toggleMobileMenu()"
-        >
-          <span></span><span></span><span></span>
-        </button>
+      <div class="nav-right" id="navRight">
+        <!-- filled by JS -->
       </div>
-      <!-- Mobile dropdown menu -->
+      <button
+        class="nav-hamburger"
+        id="hamburgerBtn"
+        onclick="toggleMobileMenu()"
+      >
+        <span></span><span></span><span></span>
+      </button>
       <div class="nav-mobile-menu" id="mobileMenu">
         <a class="nav-mobile-link active" href="index.html">🎬 Movies</a>
-        <a class="nav-mobile-link" href="#" onclick="showComing()">🎭 Events</a>
-        <a class="nav-mobile-link" href="#" onclick="showComing()">🎁 Offers</a>
+        <a class="nav-link" href="#" onclick="showComing()">🎭 Events</a>
+        <a class="nav-link" href="#" onclick="showComing()">🎁 Offers</a>
         <div class="nav-mobile-divider"></div>
         <div id="mobileAdminBtn"></div>
         <div id="mobileNavRight"></div>
