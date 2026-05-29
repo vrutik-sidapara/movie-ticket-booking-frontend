@@ -1,0 +1,1367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineBook — Book Movie Tickets Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* ── HERO ── */
+      .hero {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        overflow: hidden;
+        background: linear-gradient(
+          135deg,
+          #0d0000 0%,
+          #1a0505 40%,
+          #0a0a0a 100%
+        );
+        padding: 80px 56px;
+      }
+      .hero-bg-reel {
+        position: absolute;
+        inset: 0;
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 60px,
+            rgba(200, 0, 0, 0.03) 60px,
+            rgba(200, 0, 0, 0.03) 61px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 60px,
+            rgba(200, 0, 0, 0.03) 60px,
+            rgba(200, 0, 0, 0.03) 61px
+          );
+        pointer-events: none;
+      }
+      .hero-glow {
+        position: absolute;
+        top: -200px;
+        left: -100px;
+        width: 700px;
+        height: 700px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(220, 30, 30, 0.12) 0%,
+          transparent 65%
+        );
+        pointer-events: none;
+      }
+      .hero-glow-2 {
+        position: absolute;
+        bottom: -150px;
+        right: 0;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(220, 30, 30, 0.06) 0%,
+          transparent 65%
+        );
+        pointer-events: none;
+      }
+      .hero-content {
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        max-width: 100%;
+        min-width: 0;
+      }
+      .hero-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(220, 30, 30, 0.12);
+        border: 1px solid rgba(220, 30, 30, 0.3);
+        color: var(--red);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        padding: 6px 14px;
+        border-radius: 2px;
+        margin-bottom: 24px;
+        animation: fadeUp 0.5s ease both;
+      }
+      .hero-tag-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+        animation: blink 1.5s ease infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .hero h1 {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: clamp(56px, 9vw, 110px);
+        font-weight: 900;
+        line-height: 0.9;
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+        animation: fadeUp 0.5s 0.1s ease both;
+      }
+      .hero h1 .line2 {
+        color: var(--red);
+        display: block;
+        -webkit-text-stroke: 2px var(--red);
+      }
+      .hero h1 .line2 span {
+        -webkit-text-fill-color: transparent;
+      }
+      .hero-desc {
+        font-size: 17px;
+        color: var(--muted);
+        line-height: 1.75;
+        max-width: 480px;
+        margin-bottom: 36px;
+        font-weight: 300;
+        animation: fadeUp 0.5s 0.2s ease both;
+      }
+      .hero-cta {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        animation: fadeUp 0.5s 0.3s ease both;
+      }
+      .hero-stats {
+        position: absolute;
+        right: 56px;
+        top: 40%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+        z-index: 2;
+        animation: fadeUp 0.5s 0.4s ease both;
+      }
+      .hero-stat {
+        text-align: center;
+      }
+      .hero-stat-num {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 48px;
+        font-weight: 900;
+        color: var(--red);
+        line-height: 1;
+      }
+      .hero-stat-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 2px;
+      }
+      .hero-divider {
+        width: 1px;
+        height: 40px;
+        background: var(--border);
+        margin: 0 auto;
+      }
+
+      /* ── MARQUEE ── */
+      .marquee-bar {
+        background: var(--red);
+        padding: 0;
+        overflow: hidden;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        height: 50px;
+        flex-shrink: 0;
+      }
+      .marquee-track {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        animation: marquee 40s linear infinite;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .marquee-item {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.9);
+        padding: 0 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        flex-shrink: 0;
+        line-height: 1;
+        height: 50px;
+      }
+      .marquee-sep {
+        color: rgba(255, 255, 255, 0.4);
+        font-weight: 400;
+      }
+      @keyframes marquee {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
+      }
+
+      /* ── FILTER BAR ── */
+      .filter-strip {
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 56px;
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: 12px;
+        position: sticky;
+        top: 64px;
+        z-index: 90;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+      .search-wrap {
+        flex: 1;
+        min-width: 200px;
+        max-width: 340px;
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        color: var(--muted);
+        font-size: 15px;
+        pointer-events: none;
+      }
+      .search-input {
+        width: 100%;
+        padding: 10px 14px 10px 40px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        color: var(--text);
+        font-size: 14px;
+        font-family: "Barlow", sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .search-input:focus {
+        border-color: var(--red);
+      }
+      .search-input::placeholder {
+        color: var(--muted2);
+      }
+      .filter-pill {
+        padding: 9px 18px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: "Barlow", sans-serif;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--surface2);
+        color: var(--muted);
+        transition: all 0.15s;
+      }
+      .filter-pill:hover {
+        color: var(--text);
+        border-color: var(--muted2);
+      }
+      .filter-pill.active {
+        background: var(--red);
+        color: #fff;
+        border-color: var(--red);
+      }
+      .filter-select {
+        padding: 9px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: "Barlow", sans-serif;
+        cursor: pointer;
+        outline: none;
+      }
+      .filter-results {
+        margin-left: auto;
+        font-size: 13px;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      /* ── MOVIES SECTION ── */
+      .movies-section {
+        padding: 48px 56px;
+      }
+      .section-header {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .section-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 40px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+      }
+      .section-count {
+        font-size: 14px;
+        color: var(--muted);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+
+      /* ── MOVIE CARDS ── */
+      .movies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 24px;
+      }
+      .movie-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition:
+          transform 0.22s ease,
+          border-color 0.22s ease,
+          box-shadow 0.22s ease;
+        position: relative;
+      }
+      .movie-card:hover {
+        transform: translateY(-6px);
+        border-color: rgba(220, 30, 30, 0.5);
+        box-shadow:
+          0 20px 48px rgba(220, 30, 30, 0.12),
+          0 8px 16px rgba(0, 0, 0, 0.4);
+      }
+      .movie-poster {
+        position: relative;
+        aspect-ratio: 2/3;
+        overflow: hidden;
+        background: var(--surface2);
+      }
+      .movie-poster-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+      .movie-card:hover .movie-poster-img {
+        transform: scale(1.05);
+      }
+      .movie-poster-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 64px;
+        background: linear-gradient(135deg, #1a0505, #0d0d1a);
+      }
+      .movie-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--red);
+        color: #fff;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 2px;
+      }
+      .movie-rating-chip {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #f5c518;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-family: "JetBrains Mono", monospace;
+      }
+      .movie-hover-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.95) 0%,
+          transparent 50%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 16px;
+      }
+      .movie-card:hover .movie-hover-overlay {
+        opacity: 1;
+      }
+      .hover-book-btn {
+        background: var(--red);
+        color: #fff;
+        padding: 10px;
+        border-radius: 6px;
+        border: none;
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        width: 100%;
+        text-transform: uppercase;
+        transition: background 0.15s;
+      }
+      .hover-book-btn:hover {
+        background: var(--red-dark);
+      }
+      .movie-info {
+        padding: 14px;
+      }
+      .movie-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        margin-bottom: 4px;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .movie-meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .movie-tags-row {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .movie-tag {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 2px;
+        text-transform: uppercase;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .movie-tag.lang {
+        border-color: rgba(220, 30, 30, 0.3);
+        color: var(--red);
+        background: rgba(220, 30, 30, 0.06);
+      }
+
+      /* ── SKELETON ── */
+      .movies-skeleton {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 24px;
+      }
+      .skel-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .skel-poster {
+        aspect-ratio: 2/3;
+        background: var(--surface2);
+        position: relative;
+        overflow: hidden;
+      }
+      .skel-poster::after,
+      .skel-line::after,
+      .skel-line2::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.04),
+          transparent
+        );
+        animation: shimmer 1.4s ease infinite;
+      }
+      .skel-line {
+        height: 14px;
+        background: var(--surface2);
+        border-radius: 3px;
+        margin: 14px 14px 8px;
+        position: relative;
+        overflow: hidden;
+      }
+      .skel-line2 {
+        height: 12px;
+        width: 60%;
+        background: var(--surface2);
+        border-radius: 3px;
+        margin: 0 14px 14px;
+        position: relative;
+        overflow: hidden;
+      }
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      /* ── EMPTY ── */
+      .empty-wrap {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 80px 20px;
+      }
+      .empty-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+      .empty-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 8px;
+      }
+      .empty-sub {
+        color: var(--muted);
+        font-size: 15px;
+      }
+
+      /* ── GENRE CHIPS ── */
+      .genre-row {
+        display: flex;
+        gap: 8px;
+        flex-wrap: nowrap;
+        padding: 16px 56px 16px;
+        margin-top: 0;
+        position: relative;
+        z-index: 2;
+        background: #000;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .genre-row::-webkit-scrollbar {
+        display: none;
+      }
+      .genre-chip {
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 500;
+        font-family: "Barlow", sans-serif;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+        transition: all 0.15s;
+      }
+      .genre-chip:hover {
+        color: var(--text);
+        border-color: var(--muted2);
+      }
+      .genre-chip.active {
+        background: rgba(220, 30, 30, 0.12);
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      /* ── FOOTER ── */
+      .footer {
+        background: #0a0a0a;
+        border-top: 1px solid var(--border);
+        padding: 56px 56px 24px;
+        margin-top: 40px;
+      }
+      /* .footer-main {
+        display: flex;
+        gap: 48px;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+      }
+      .footer-brand {
+        max-width: 220px;
+      } */
+      .footer-logo {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 26px;
+        font-weight: 900;
+        color: var(--text);
+        letter-spacing: 1px;
+      }
+      .footer-logo em {
+        color: var(--red);
+        font-style: normal;
+      }
+      /* Desktop 1024px */
+      @media (max-width: 1024px) {
+        .hero-stats {
+          right: 20px;
+        }
+        .hero-content {
+          max-width: calc(100% - 120px);
+        }
+      }
+
+      /* Mobile 768px */
+      @media (max-width: 768px) {
+        .hero-stats {
+          display: none !important;
+        }
+        .hero {
+          padding: 80px 20px 60px !important;
+        }
+      }
+
+      /* Small Mobile 480px */
+      @media (max-width: 480px) {
+        .hero {
+          padding: 80px 16px 50px !important;
+        }
+      }
+      /* .footer-tagline {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 10px;
+        line-height: 1.6;
+      }
+      .footer-dev {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 8px;
+        margin-bottom: 4px;
+      }
+      .footer-dev strong {
+        color: var(--red);
+      }
+      .footer-socials {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .footer-social-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        text-decoration: none;
+        transition: all 0.2s;
+        background: var(--surface2);
+      }
+      .footer-social-btn:hover {
+        color: var(--red);
+        border-color: rgba(220, 30, 30, 0.4);
+        background: rgba(220, 30, 30, 0.06);
+        transform: translateY(-2px);
+      }
+      .footer-section {
+        min-width: 120px;
+      }
+      .footer-heading {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text);
+        margin-bottom: 16px;
+      }
+      .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .footer-list a {
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        transition: color 0.15s;
+      }
+      .footer-list a:hover {
+        color: var(--red);
+      }
+      .footer-bottom {
+        border-top: 1px solid var(--border);
+        padding-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: var(--muted);
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .footer-back-top {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: color 0.15s;
+      }
+      .footer-back-top:hover {
+        color: var(--red);
+      } */
+    </style>
+  </head>
+  <body>
+    <div id="toast-root"></div>
+    <div id="auth-modal-root"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="mainNav">
+      <div class="nav-left">
+        <div class="logo" onclick="window.location.href = 'index.html'">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">CINE<em>BOOK</em></span>
+        </div>
+        <div class="nav-links">
+          <a class="nav-link active" href="index.html">Movies</a>
+          <a class="nav-link" href="#" onclick="showComing()">Events</a>
+          <a class="nav-link" href="#" onclick="showComing()">Offers</a>
+        </div>
+      </div>
+      <div class="nav-right" id="navRight">
+        <!-- filled by JS -->
+      </div>
+      <!-- ✅ Hamburger button add કરો -->
+      <button
+        class="nav-hamburger"
+        id="hamburgerBtn"
+        onclick="toggleMobileMenu()"
+      >
+        <span></span><span></span><span></span>
+      </button>
+      <!-- ✅ Mobile dropdown menu -->
+      <div class="nav-mobile-menu" id="mobileMenu">
+        <a class="nav-mobile-link active" href="index.html">🎬 Movies</a>
+        <a class="nav-mobile-link" href="#" onclick="showComing()">🎭 Events</a>
+        <a class="nav-mobile-link" href="#" onclick="showComing()">🎁 Offers</a>
+        <div class="nav-mobile-divider"></div>
+        <div id="mobileAdminBtn"></div>
+        <div id="mobileNavRight"></div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg-reel"></div>
+      <div class="hero-glow"></div>
+      <div class="hero-glow-2"></div>
+      <div class="hero-content">
+        <div class="hero-tag">
+          <span class="hero-tag-dot"></span>Now Showing — 2026
+        </div>
+        <h1>
+          BOOK YOUR<br /><span class="line2"><span>PERFECT SEAT</span></span>
+        </h1>
+        <p class="hero-desc">
+          From blockbusters to indie gems — find showtimes, pick your seats, and
+          enjoy the show. India's fastest ticket booking experience.
+        </p>
+        <div class="hero-cta">
+          <button
+            class="btn btn-red"
+            onclick="
+              document
+                .getElementById('movies-anchor')
+                .scrollIntoView({ behavior: 'smooth' })
+            "
+          >
+            Browse Movies &nbsp;↓
+          </button>
+          <button class="btn btn-ghost" onclick="openAuthModal('register')">
+            Join Free →
+          </button>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="statMovies">—</div>
+          <div class="hero-stat-label">Movies</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="statTheaters">0</div>
+          <div class="hero-stat-label">Theaters</div>
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="statCities">0</div>
+          <div class="hero-stat-label">Cities</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee-bar" aria-hidden="true">
+      <div class="marquee-track" id="marqueeTrack">
+        <span class="marquee-item"
+          >🎬 Now Showing <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🍿 Book Tickets <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🌟 Latest Releases <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🎭 All Genres <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🏆 Top Rated <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >📍 Multiple Cities <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🎟 Easy Booking <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🔥 Blockbusters <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🎬 Now Showing <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🍿 Book Tickets <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🌟 Latest Releases <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🎭 All Genres <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🏆 Top Rated <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >📍 Multiple Cities <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🎟 Easy Booking <span class="marquee-sep">·</span></span
+        >
+        <span class="marquee-item"
+          >🔥 Blockbusters <span class="marquee-sep">·</span></span
+        >
+      </div>
+    </div>
+
+    <!-- GENRE CHIPS -->
+    <div class="genre-row" id="genreChips">
+      <div class="genre-chip active" onclick="filterGenre('', this)">All</div>
+      <div class="genre-chip" onclick="filterGenre('Action', this)">
+        💥 Action
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Drama', this)">
+        🎭 Drama
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Comedy', this)">
+        😂 Comedy
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Sci-Fi', this)">
+        🚀 Sci-Fi
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Thriller', this)">
+        🔪 Thriller
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Horror', this)">
+        👻 Horror
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Romance', this)">
+        💕 Romance
+      </div>
+      <div class="genre-chip" onclick="filterGenre('Animation', this)">
+        🎨 Animation
+      </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-strip">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search movies..."
+          id="searchBox"
+          oninput="applyFilters()"
+        />
+      </div>
+      <select class="filter-select" id="langSelect" onchange="applyFilters()">
+        <option value="">All Languages</option>
+        <option>Hindi</option>
+        <option>English</option>
+        <option>Tamil</option>
+        <option>Telugu</option>
+        <option>Malayalam</option>
+        <option>Kannada</option>
+      </select>
+      <select class="filter-select" id="sortSelect" onchange="applyFilters()">
+        <option value="">Sort: Default</option>
+        <option value="rating">Sort: Rating ↓</option>
+        <option value="az">Sort: A → Z</option>
+        <option value="duration">Sort: Duration ↓</option>
+      </select>
+      <div class="filter-results" id="filterResults">Loading movies...</div>
+    </div>
+
+    <!-- MOVIES GRID -->
+    <div class="movies-section" id="movies-anchor">
+      <div class="section-header">
+        <div class="section-title">NOW SHOWING</div>
+        <div class="section-count" id="movieCount">—</div>
+      </div>
+      <div id="moviesGrid" class="movies-skeleton">
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+        <div class="skel-card">
+          <div class="skel-poster"></div>
+          <div class="skel-line"></div>
+          <div class="skel-line2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-logo">CINE<em>BOOK</em></div>
+      <div class="footer-copy">
+        All Rights Reserved and Developed by Vrutik Sidapara
+      </div>
+      <div class="footer-copy">
+        © 2026 CineBook. Built for movie lovers across India.
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      // ─────────────────────────────────────────
+      // HOME PAGE LOGIC
+      // ─────────────────────────────────────────
+      const MOCK_MOVIES = [
+        {
+          _id: "m1",
+          title: "Pathaan",
+          genre: "Action",
+          language: "Hindi",
+          duration: 146,
+          rating: 4.2,
+          emoji: "🔥",
+          description:
+            "An exiled spy returns to India on a mission to stop the most lethal mercenary force ever assembled.",
+        },
+        {
+          _id: "m2",
+          title: "RRR",
+          genre: "Action",
+          language: "Telugu",
+          duration: 187,
+          rating: 4.9,
+          emoji: "💥",
+          description:
+            "A fictional take on the lives of two legendary revolutionaries before they began fighting for their country.",
+        },
+        {
+          _id: "m3",
+          title: "Avatar: The Way of Water",
+          genre: "Sci-Fi",
+          language: "English",
+          duration: 192,
+          rating: 4.3,
+          emoji: "🌊",
+          description:
+            "The Sully family journeys to the seas of Pandora to protect themselves from a relentless threat.",
+        },
+        {
+          _id: "m4",
+          title: "Brahmastra Part 1",
+          genre: "Action",
+          language: "Hindi",
+          duration: 167,
+          rating: 3.8,
+          emoji: "⚡",
+          description:
+            "A unique love story set in the magical universe of ancient Indian weapons — the Astras.",
+        },
+        {
+          _id: "m5",
+          title: "The Kashmir Files",
+          genre: "Drama",
+          language: "Hindi",
+          duration: 170,
+          rating: 4.5,
+          emoji: "🏔",
+          description:
+            "The untold truth of the exodus of Kashmiri Pandits, one of the greatest human rights tragedies.",
+        },
+        {
+          _id: "m6",
+          title: "KGF Chapter 2",
+          genre: "Action",
+          language: "Kannada",
+          duration: 168,
+          rating: 4.7,
+          emoji: "👑",
+          description:
+            "Rocky's empire expands but bloodier conflicts and dangerous enemies threaten his new kingdom.",
+        },
+        {
+          _id: "m7",
+          title: "Vikram",
+          genre: "Thriller",
+          language: "Tamil",
+          duration: 174,
+          rating: 4.8,
+          emoji: "💀",
+          description:
+            "A black ops operative is set on a deadly mission. Retribution will be sought by those who wronged him.",
+        },
+        {
+          _id: "m8",
+          title: "Doctor Strange in the Multiverse of Madness",
+          genre: "Sci-Fi",
+          language: "English",
+          duration: 126,
+          rating: 4.0,
+          emoji: "🌀",
+          description:
+            "Doctor Strange ventures into the Multiverse and faces the consequences of his powers.",
+        },
+        {
+          _id: "m9",
+          title: "Pushpa: The Rule",
+          genre: "Action",
+          language: "Telugu",
+          duration: 190,
+          rating: 4.6,
+          emoji: "🌹",
+          description:
+            "The iconic red sandalwood smuggler takes on rivals and threats that go all the way to the top.",
+        },
+        {
+          _id: "m10",
+          title: "Jawan",
+          genre: "Action",
+          language: "Hindi",
+          duration: 169,
+          rating: 4.5,
+          emoji: "🪖",
+          description:
+            "A man driven by a personal vendetta carries out a series of carefully planned heists.",
+        },
+        {
+          _id: "m11",
+          title: "Dunki",
+          genre: "Drama",
+          language: "Hindi",
+          duration: 161,
+          rating: 4.0,
+          emoji: "✈️",
+          description:
+            "A heartwarming story about ordinary people with extraordinary dreams of reaching another land.",
+        },
+        {
+          _id: "m12",
+          title: "Animal",
+          genre: "Thriller",
+          language: "Hindi",
+          duration: 204,
+          rating: 4.4,
+          emoji: "🐾",
+          description:
+            "A son's love for his father manifests as a ruthless, obsessive mission of revenge and power.",
+        },
+      ];
+
+      let allMovies = [];
+      let activeGenre = "";
+
+      async function loadMovies() {
+        const r = await api("GET", "/movies");
+
+        const movies = r.data?.movies || r.data?.data || r.data || [];
+
+        allMovies =
+          Array.isArray(movies) && movies.length ? movies : MOCK_MOVIES;
+
+        // THEATER COUNT
+        const theaterRes = await api("GET", "/theater");
+        const theaters =
+          theaterRes.data?.theaters || theaterRes.data?.data || [];
+        document.getElementById("statTheaters").textContent = theaters.length;
+
+        // CITY COUNT + dropdown
+        const cityRes = await api("GET", "/city");
+        const cities = cityRes.data?.city || cityRes.data?.data || [];
+        document.getElementById("statCities").textContent = cities.length;
+
+        // ── City dropdown in navbar ──
+        const cityNames = cities
+          .map((c) => c.Name || c.name)
+          .filter(Boolean)
+          .sort();
+        const navRight = document.getElementById("navRight");
+        if (cityNames.length && !document.getElementById("idxCityWrap")) {
+          const div = document.createElement("div");
+          div.id = "idxCityWrap";
+          div.style.cssText = "display:flex;align-items:center;gap:4px;";
+          div.innerHTML = `
+            <span style="font-size:13px;color:var(--muted)">📍</span>
+            <select
+              id="idxCitySelect"
+              style="background:#111;color:white;border:1px solid #333;height:40px;padding:0 8px;border-radius:10px;font-size:12px;cursor:pointer;outline:none;"            >
+              <option value="">All Cities</option>
+              ${cityNames.map((c) => `<option value="${c}">${c}</option>`).join("")}
+            </select>`;
+          navRight.prepend(div);
+        }
+
+        // MOVIE COUNT
+        document.getElementById("statMovies").textContent = allMovies.length;
+        document.getElementById("movieCount").textContent =
+          `${allMovies.length} movies`;
+
+        applyFilters();
+      }
+
+      function filterGenre(genre, el) {
+        activeGenre = genre;
+        document
+          .querySelectorAll(".genre-chip")
+          .forEach((c) => c.classList.remove("active"));
+        el.classList.add("active");
+        applyFilters();
+      }
+
+      function applyFilters() {
+        const search = document
+          .getElementById("searchBox")
+          .value.toLowerCase()
+          .trim();
+        const lang = document.getElementById("langSelect").value;
+        const sort = document.getElementById("sortSelect").value;
+
+        let filtered = allMovies.filter(
+          (m) =>
+            (!search ||
+              m.title.toLowerCase().includes(search) ||
+              (m.genre || "").toLowerCase().includes(search)) &&
+            (!activeGenre || m.genre === activeGenre) &&
+            (!lang || m.language === lang),
+        );
+
+        if (sort === "rating")
+          filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        else if (sort === "az")
+          filtered.sort((a, b) => a.title.localeCompare(b.title));
+        else if (sort === "duration")
+          filtered.sort((a, b) => (b.duration || 0) - (a.duration || 0));
+
+        document.getElementById("filterResults").textContent =
+          `${filtered.length} result${filtered.length !== 1 ? "s" : ""}`;
+        renderMovies(filtered);
+      }
+
+      function renderMovies(movies) {
+        const grid = document.getElementById("moviesGrid");
+        grid.className = "movies-grid";
+
+        if (!movies.length) {
+          grid.innerHTML = `<div class="empty-wrap">
+  <div class="empty-icon">🎬</div>
+  <div class="empty-title">No movies found</div>
+  <div class="empty-sub">Try adjusting your filters or search terms</div>
+</div>`;
+          return;
+        }
+
+        grid.innerHTML = movies
+          .map((m) => {
+            // ✅ handle both DB fields (Name, Duration) and mock fields (title, duration)
+            const title = m.title || m.Name || "Unknown";
+            const duration = m.duration || m.Duration || 120;
+            const genre = m.genre || "Drama";
+            const language = m.language || "Hindi";
+            const id = m.id || m._id;
+
+            const rating = m.rating || (3.5 + Math.random()).toFixed(1);
+
+            // ✅ Hide fallback when image exists
+            const hasPoster = !!m.image;
+
+            const imgSrc = m.image?.startsWith("http")
+              ? m.image
+              : `https://cinebook-app.onrender.com/uploads/${m.image}`;
+
+            const imgHtml = hasPoster
+              ? `<img class="movie-poster-img"
+      src="${imgSrc}"
+      alt="${title}"
+      onerror="this.parentElement.querySelector('.movie-poster-fallback').style.display='flex';this.style.display='none'">`
+              : "";
+
+            return `<div class="movie-card" onclick="goToDetail('${id}')">
+  <div class="movie-poster">
+    <div class="movie-poster-fallback" style="${hasPoster ? "display:none" : "display:flex"}">${m.emoji || "🎬"}</div>
+    ${imgHtml}
+    <div class="movie-badge">Now Showing</div>
+    <div class="movie-rating-chip">★ ${rating}</div>
+    <div class="movie-hover-overlay">
+      <button class="hover-book-btn" onclick="event.stopPropagation();goToDetail('${id}')">BOOK TICKETS →</button>
+    </div>
+  </div>
+  <div class="movie-info">
+    <div class="movie-title">${title}</div>
+    <div class="movie-meta">${Math.floor(duration / 60)}h ${duration % 60}m
+  &nbsp;·&nbsp;
+  ${genre}</div>
+    <div class="movie-tags-row">
+      <span class="movie-tag lang">${language}</span>
+      <span class="movie-tag">2D</span>
+      ${duration > 150 ? '<span class="movie-tag">3D</span>' : ""}
+    </div>
+  </div>
+</div>`;
+          })
+          .join("");
+      }
+
+      function goToDetail(id) {
+        sessionStorage.setItem("cb_movie", id);
+
+        // ✅ Normalize field names before saving so detail page can read them
+        const normalized = allMovies.map((m) => ({
+          ...m,
+          title: m.title || m.Name,
+          description: m.description || m.Description,
+          duration: m.duration || m.Duration,
+        }));
+
+        sessionStorage.setItem("cb_movies", JSON.stringify(normalized));
+        window.location.href = `detail.html?id=${id}`;
+      }
+
+      function showComing() {
+        showToast("Coming soon! 🚀", "info");
+      }
+
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobileMenu");
+        const btn = document.getElementById("hamburgerBtn");
+
+        menu.classList.toggle("open");
+        btn.classList.toggle("open");
+      }
+
+      document.addEventListener("click", (e) => {
+        const menu = document.getElementById("mobileMenu");
+        const btn = document.getElementById("hamburgerBtn");
+
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+          menu.classList.remove("open");
+          btn.classList.remove("open");
+        }
+      });
+
+      // Init
+      initShared();
+      renderNav();
+      loadMovies();
+    </script>
+  </body>
+</html>

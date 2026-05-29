@@ -1,0 +1,1560 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineBook — Movie Details</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      /* ── HERO DETAIL ── */
+      .detail-hero {
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          #120000 0%,
+          #0d0000 60%,
+          #080808 100%
+        );
+        padding: 60px 56px 48px;
+        overflow: hidden;
+        border-bottom: 1px solid var(--border);
+      }
+      .detail-bg-blur {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        filter: blur(60px) saturate(2);
+        opacity: 0.12;
+        background-size: cover;
+        background-position: center;
+      }
+      .detail-layout {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        gap: 48px;
+        align-items: flex-start;
+      }
+      .detail-poster-wrap {
+        flex-shrink: 0;
+        width: 220px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid rgba(220, 30, 30, 0.3);
+        box-shadow:
+          0 20px 60px rgba(0, 0, 0, 0.6),
+          0 0 0 1px var(--border);
+        aspect-ratio: 2/3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--surface2);
+        font-size: 80px;
+        position: relative;
+      }
+      .detail-poster-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+      }
+      .detail-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted);
+        cursor: pointer;
+        margin-bottom: 20px;
+        transition: color 0.15s;
+        background: none;
+        border: none;
+        font-family: "Barlow", sans-serif;
+        padding: 0;
+      }
+      .back-btn:hover {
+        color: var(--text);
+      }
+      .detail-title {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 64px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        line-height: 0.92;
+        margin-bottom: 16px;
+      }
+      .detail-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      .detail-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(245, 197, 24, 0.1);
+        border: 1px solid rgba(245, 197, 24, 0.25);
+        padding: 8px 16px;
+        border-radius: 6px;
+      }
+      .detail-rating-num {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 28px;
+        font-weight: 900;
+        color: var(--gold);
+        line-height: 1;
+      }
+      .detail-rating-label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .detail-tag {
+        padding: 5px 14px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .detail-tag-red {
+        background: rgba(220, 30, 30, 0.12);
+        border: 1px solid rgba(220, 30, 30, 0.3);
+        color: var(--red);
+      }
+      .detail-tag-outline {
+        border: 1px solid var(--border2);
+        color: var(--muted);
+        background: transparent;
+      }
+      .detail-desc {
+        font-size: 16px;
+        color: var(--muted);
+        line-height: 1.8;
+        max-width: 580px;
+        margin-bottom: 28px;
+        font-weight: 300;
+      }
+      .detail-stats {
+        display: flex;
+        gap: 36px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+      }
+      .detail-stat-item .lbl {
+        font-size: 11px;
+        color: var(--muted2);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 5px;
+      }
+      .detail-stat-item .val {
+        font-size: 17px;
+        font-weight: 600;
+      }
+
+      /* ── SHOWS SECTION ── */
+      .shows-section {
+        padding: 48px 56px;
+      }
+      .shows-date-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 28px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .date-tab {
+        flex-shrink: 0;
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+      }
+      .date-tab:hover {
+        border-color: var(--border2);
+      }
+      .date-tab.active {
+        border-color: var(--red);
+        background: rgba(220, 30, 30, 0.08);
+      }
+      .date-tab-day {
+        font-size: 11px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .date-tab-date {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        margin: 2px 0;
+      }
+      .date-tab-month {
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .date-tab.active .date-tab-date {
+        color: var(--red);
+      }
+
+      .theater-block {
+        margin-bottom: 28px;
+      }
+      .theater-block-name {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .theater-block-name::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+      .show-times-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .show-time-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 22px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        cursor: pointer;
+        transition: all 0.18s;
+        min-width: 100px;
+      }
+      .show-time-btn:hover {
+        border-color: var(--red);
+        background: rgba(220, 30, 30, 0.05);
+      }
+      .show-time-btn.sold-out {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .show-time {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .show-avail {
+        font-size: 11px;
+        margin-top: 4px;
+      }
+      .show-avail.good {
+        color: var(--green);
+      }
+      .show-avail.low {
+        color: var(--gold);
+      }
+      .show-avail.none {
+        color: var(--red);
+      }
+      .show-price {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+
+      /* ── SEAT MODAL ── */
+      .seat-modal {
+        max-width: 860px;
+        width: 95vw;
+        max-height: 90vh; /* ✅ limit height */
+        overflow-y: auto; /* ✅ scroll inside modal */
+        margin: auto;
+      }
+      .screen-curve {
+        width: 100%;
+        height: 36px;
+        margin-bottom: 36px;
+        border-top: 4px solid rgba(255, 255, 255, 0.15);
+        border-radius: 60% 60% 0 0 / 100% 100% 0 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        padding-bottom: 4px;
+      }
+      .screen-label {
+        font-size: 11px;
+        color: var(--muted);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+      }
+      .seat-grid {
+        margin-bottom: 28px;
+      }
+      .seat-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 8px;
+        justify-content: center;
+        flex-wrap: nowrap;
+      }
+      .seat-row-lbl {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        color: var(--muted2);
+        width: 18px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .seat {
+        width: 34px;
+        height: 30px;
+        border-radius: 5px 5px 2px 2px;
+        cursor: pointer;
+        border: 1px solid;
+        font-size: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "JetBrains Mono", monospace;
+        transition: all 0.12s;
+        font-weight: 600;
+        border-bottom-width: 3px;
+        position: relative;
+      }
+      .seat.avail {
+        background: rgba(29, 185, 84, 0.08);
+        border-color: rgba(29, 185, 84, 0.45);
+        color: rgba(29, 185, 84, 0.7);
+      }
+      .seat.avail:hover {
+        background: rgba(29, 185, 84, 0.22);
+        transform: scale(1.15);
+        z-index: 2;
+      }
+      .seat.picked {
+        background: var(--red);
+        border-color: var(--red-dark);
+        color: #fff;
+        transform: scale(1.05);
+      }
+      .seat.booked {
+        background: var(--surface3);
+        border-color: var(--muted2);
+        color: var(--muted2);
+        cursor: not-allowed;
+      }
+      .seat-legend {
+        display: flex;
+        gap: 24px;
+        justify-content: center;
+        margin-bottom: 24px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .legend-box {
+        width: 20px;
+        height: 18px;
+        border-radius: 4px 4px 2px 2px;
+        border: 1px solid;
+        border-bottom-width: 3px;
+      }
+      .legend-box.avail {
+        background: rgba(29, 185, 84, 0.08);
+        border-color: rgba(29, 185, 84, 0.45);
+      }
+      .legend-box.picked {
+        background: var(--red);
+        border-color: var(--red-dark);
+      }
+      .legend-box.booked {
+        background: var(--surface3);
+        border-color: var(--muted2);
+      }
+      .seat-aisle {
+        width: 20px;
+        flex-shrink: 0;
+      }
+      .booking-summary {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+      }
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .summary-row:last-child {
+        margin-bottom: 0;
+      }
+      .summary-total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text);
+        border-top: 1px solid var(--border);
+        padding-top: 12px;
+        margin-top: 12px;
+      }
+
+      /* ── RATING ── */
+      .rating-section {
+        padding: 48px 56px;
+        border-top: 1px solid var(--border);
+      }
+      .stars-row {
+        display: flex;
+        gap: 8px;
+        margin: 12px 0 20px;
+      }
+      .star-btn {
+        font-size: 38px;
+        cursor: pointer;
+        color: var(--muted2);
+        transition:
+          color 0.1s,
+          transform 0.1s;
+        line-height: 1;
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .star-btn:hover,
+      .star-btn.lit {
+        color: var(--gold);
+        transform: scale(1.15);
+      }
+      .rating-form-wrap {
+        max-width: 520px;
+      }
+
+      /* ── RESPONSIVE ── */
+
+      /* Tablet: 768px and below */
+      @media (max-width: 768px) {
+        .detail-hero {
+          padding: 32px 20px 28px;
+        }
+        .detail-layout {
+          flex-direction: column;
+          gap: 24px;
+        }
+        .detail-poster-wrap {
+          width: 140px;
+        }
+        .detail-title {
+          font-size: 40px;
+        }
+        .detail-desc {
+          font-size: 14px;
+        }
+        .detail-stats {
+          gap: 20px;
+        }
+        .shows-section {
+          padding: 32px 20px;
+        }
+        .rating-section {
+          padding: 32px 20px;
+        }
+
+        .seat {
+          width: 28px;
+          height: 26px;
+          font-size: 9px;
+        }
+        .seat-aisle {
+          width: 12px;
+        }
+        .seat-row {
+          gap: 3px;
+        }
+        .seat-modal {
+          padding: 20px 12px;
+        }
+      }
+
+      /* Mobile: 480px and below */
+      @media (max-width: 480px) {
+        .detail-hero {
+          padding: 24px 16px 20px;
+        }
+        .detail-title {
+          font-size: 32px;
+        }
+        .detail-poster-wrap {
+          width: 120px;
+        }
+        .detail-meta-row {
+          gap: 10px;
+        }
+        .detail-stats {
+          gap: 14px;
+        }
+        .detail-stat-item .val {
+          font-size: 14px;
+        }
+
+        .shows-section,
+        .rating-section {
+          padding: 24px 16px;
+        }
+        .show-time-btn {
+          padding: 10px 14px;
+          min-width: 80px;
+        }
+
+        /* Seat grid shrinks for small phones */
+        .seat {
+          width: 24px;
+          height: 22px;
+          font-size: 8px;
+          border-bottom-width: 2px;
+        }
+        .seat-aisle {
+          width: 8px;
+        }
+        .seat-row {
+          gap: 2px;
+          margin-bottom: 5px;
+        }
+        .seat-row-lbl {
+          width: 14px;
+          font-size: 9px;
+        }
+        .seat-modal {
+          padding: 16px 8px;
+        }
+        .seat-legend {
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .modal-title {
+          font-size: 18px;
+        }
+        .modal-subtitle {
+          font-size: 11px;
+        }
+        .summary-total-row {
+          font-size: 15px;
+        }
+      }
+
+      /* Very small: 320px */
+      @media (max-width: 360px) {
+        .seat {
+          width: 20px;
+          height: 20px;
+          font-size: 7px;
+        }
+        .seat-aisle {
+          width: 6px;
+        }
+        .seat-row {
+          gap: 2px;
+        }
+        .detail-title {
+          font-size: 26px;
+        }
+      }
+
+      .seat.sofa {
+        background: #1a0e2e;
+        border-color: #7c3aed #7c3aed #4c1d95;
+        color: #a78bfa;
+      }
+      .seat.sofa:hover {
+        background: #2d1a52;
+        transform: scale(1.15);
+        z-index: 2;
+      }
+
+      .seat.gold {
+        background: #1c1200;
+        border-color: #d97706 #d97706 #92400e;
+        color: #fbbf24;
+      }
+      .seat.gold:hover {
+        background: #2e1e00;
+        transform: scale(1.15);
+        z-index: 2;
+      }
+
+      .seat.premium {
+        background: #00171a;
+        border-color: #0891b2 #0891b2 #164e63;
+        color: #22d3ee;
+      }
+      .seat.premium:hover {
+        background: #002b32;
+        transform: scale(1.15);
+        z-index: 2;
+      }
+
+      /* ── SEAT TYPE BANNER (same structure, nava colors) ── */
+
+      .seat-type-banner {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+
+      .type-badge {
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .type-badge.sofa {
+        background: #1a0e2e;
+        color: #c4b5fd;
+        border: 1.5px solid #7c3aed;
+      }
+
+      .type-badge.gold {
+        background: #1c1200;
+        color: #fcd34d;
+        border: 1.5px solid #d97706;
+      }
+
+      .type-badge.premium {
+        background: #00171a;
+        color: #67e8f9;
+        border: 1.5px solid #0891b2;
+      }
+
+      /* ── LEGEND BOXES (same class names, nava colors) ── */
+
+      .legend-box.sofa {
+        background: #1a0e2e;
+        border-color: #7c3aed #7c3aed #4c1d95;
+      }
+
+      .legend-box.gold {
+        background: #1c1200;
+        border-color: #d97706 #d97706 #92400e;
+      }
+
+      .legend-box.premium {
+        background: #00171a;
+        border-color: #0891b2 #0891b2 #164e63;
+      }
+
+      .city-heading {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--red);
+        margin-bottom: 20px;
+        padding: 6px 14px;
+        background: rgba(220, 30, 30, 0.07);
+        border-left: 3px solid var(--red);
+        border-radius: 0 6px 6px 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      /* Navbar select hover */
+      #navCitySelect:hover,
+      #navCitySelect:focus {
+        border-color: var(--red) !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="toast-root"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="logo" onclick="window.location.href = 'index.html'">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">CINE<em>BOOK</em></span>
+        </div>
+        <div class="nav-links">
+          <a class="nav-link" href="index.html">← All Movies</a>
+        </div>
+      </div>
+      <div class="nav-right" id="navRight"></div>
+    </nav>
+
+    <!-- DETAIL HERO -->
+    <div class="detail-hero" id="detailHero">
+      <div class="detail-bg-blur" id="detailBgBlur"></div>
+      <div class="detail-layout">
+        <div class="detail-poster-wrap" id="detailPoster">🎬</div>
+        <div class="detail-info">
+          <button class="back-btn" onclick="history.back()">
+            ← Back to Movies
+          </button>
+          <div class="detail-title" id="detailTitle">Loading...</div>
+          <div class="detail-meta-row" id="detailMetaRow"></div>
+          <p class="detail-desc" id="detailDesc">Loading movie info...</p>
+          <div class="detail-stats" id="detailStats"></div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap">
+            <button
+              class="btn btn-red"
+              onclick="
+                document
+                  .getElementById('showsSection')
+                  .scrollIntoView({ behavior: 'smooth' })
+              "
+            >
+              🎟 Book Tickets
+            </button>
+            <button
+              class="btn btn-ghost"
+              onclick="
+                document
+                  .getElementById('ratingSection')
+                  .scrollIntoView({ behavior: 'smooth' })
+              "
+            >
+              ⭐ Rate Movie
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHOWS SECTION -->
+    <div class="shows-section" id="showsSection">
+      <div
+        class="section-header"
+        style="
+          display: flex;
+          align-items: baseline;
+          gap: 16px;
+          margin-bottom: 24px;
+        "
+      >
+        <div
+          class="section-title"
+          style="
+            font-family: &quot;Barlow Condensed&quot;, sans-serif;
+            font-size: 40px;
+            font-weight: 800;
+          "
+        >
+          SHOWTIMES
+        </div>
+      </div>
+      <div class="shows-date-tabs" id="dateTabs"></div>
+      <div id="showsGrid">
+        <div class="empty-state">
+          <div class="empty-state-icon">⏳</div>
+          <div class="empty-state-title">Loading shows...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RATING SECTION -->
+    <div class="rating-section" id="ratingSection">
+      <div
+        class="section-title"
+        style="
+          font-family: &quot;Barlow Condensed&quot;, sans-serif;
+          font-size: 40px;
+          font-weight: 800;
+          margin-bottom: 6px;
+        "
+      >
+        RATE THIS MOVIE
+      </div>
+      <div style="font-size: 15px; color: var(--muted); margin-bottom: 32px">
+        Share your experience with fellow movie lovers
+      </div>
+      <div class="rating-form-wrap">
+        <div class="form-label">Your Rating</div>
+        <div class="stars-row" id="starsRow">
+          <button class="star-btn" data-val="1" onclick="setStarRating(1)">
+            ★
+          </button>
+          <button class="star-btn" data-val="2" onclick="setStarRating(2)">
+            ★
+          </button>
+          <button class="star-btn" data-val="3" onclick="setStarRating(3)">
+            ★
+          </button>
+          <button class="star-btn" data-val="4" onclick="setStarRating(4)">
+            ★
+          </button>
+          <button class="star-btn" data-val="5" onclick="setStarRating(5)">
+            ★
+          </button>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Write a Review (Optional)</label>
+          <textarea
+            id="reviewText"
+            class="form-textarea"
+            rows="4"
+            placeholder="What did you think about this movie?"
+          ></textarea>
+        </div>
+        <button class="btn btn-red" onclick="submitRating()" id="ratingBtn">
+          Submit Rating ⭐
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-logo">CINE<em>BOOK</em></div>
+      <div class="footer-copy">
+        All Rights Reserved and Developed by Vrutik Sidapara
+      </div>
+      <div class="footer-copy">
+        © 2026 CineBook. Built for movie lovers across India.
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      // ──────────────────────────────────────────
+      // DETAIL PAGE
+      // ──────────────────────────────────────────
+      const urlParams = new URLSearchParams(window.location.search);
+      const movieId = urlParams.get("id");
+
+      let currentMovie = null;
+      let currentSchedules = [];
+      let selectedSched = null;
+      let pickedSeats = [];
+      let starRating = 0;
+
+      // MOCK DATA FALLBACK
+      function getMockDate(offsetDays) {
+        const d = new Date();
+        d.setDate(d.getDate() + offsetDays);
+        return d.toISOString().split("T")[0];
+      }
+
+      const MOCK_SCHEDULES = [
+        {
+          _id: "sc1",
+          screen: {
+            name: "Screen 1",
+            capacity: 120,
+            theater: { name: "PVR Cinemas" },
+          },
+          timesheet: { startTime: "09:30", endTime: "12:15" },
+          date: getMockDate(0),
+          price: 250,
+          bookedSeats: ["A3", "B5", "C2", "D7", "E1", "F8"],
+        },
+        {
+          _id: "sc2",
+          screen: {
+            name: "Screen 3",
+            capacity: 100,
+            theater: { name: "INOX Multiplex" },
+          },
+          timesheet: { startTime: "13:00", endTime: "16:00" },
+          date: getMockDate(0),
+          price: 300,
+          bookedSeats: ["A1", "A2", "B3", "B4", "C5", "C6", "D7", "D8"],
+        },
+        {
+          _id: "sc3",
+          screen: {
+            name: "Screen 2",
+            capacity: 150,
+            theater: { name: "Cinepolis" },
+          },
+          timesheet: { startTime: "16:30", endTime: "19:30" },
+          date: getMockDate(0),
+          price: 200,
+          bookedSeats: ["A5"],
+        },
+        {
+          _id: "sc4",
+          screen: {
+            name: "Audi 4",
+            capacity: 80,
+            theater: { name: "PVR Gold" },
+          },
+          timesheet: { startTime: "20:00", endTime: "23:00" },
+          date: getMockDate(0),
+          price: 450,
+          bookedSeats: ["A1", "A2", "A3", "B1", "B2", "B3", "C1", "C2", "C3"],
+        },
+        {
+          _id: "sc5",
+          screen: {
+            name: "Screen 5",
+            capacity: 200,
+            theater: { name: "MovieTime Cinemas" },
+          },
+          timesheet: { startTime: "10:00", endTime: "13:00" },
+          date: getMockDate(0),
+          price: 180,
+          bookedSeats: ["D1", "D2"],
+        },
+      ];
+      // ── LOAD MOVIE ──
+      function loadMovie() {
+        const stored = sessionStorage.getItem("cb_movies");
+        let movies = [];
+        if (stored) {
+          try {
+            movies = JSON.parse(stored);
+          } catch {}
+        }
+
+        // ✅ Try all possible ID field combinations
+        currentMovie = movies.find(
+          (m) =>
+            String(m._id) === String(movieId) ||
+            String(m.id) === String(movieId),
+        );
+
+        // ✅ Normalize fields from DB format
+        if (currentMovie) {
+          currentMovie.title =
+            currentMovie.title || currentMovie.Name || currentMovie.name;
+          currentMovie.description =
+            currentMovie.description || currentMovie.Description;
+          currentMovie.duration =
+            currentMovie.duration || currentMovie.Duration;
+          currentMovie.genre = currentMovie.genre || currentMovie.Genre;
+          currentMovie.language =
+            currentMovie.language || currentMovie.Language;
+          currentMovie.rating = currentMovie.rating || currentMovie.Rating;
+          currentMovie.image =
+            currentMovie.image || currentMovie.Image || currentMovie.poster;
+        }
+
+        if (!currentMovie) {
+          console.warn("Movie not found in sessionStorage for id:", movieId);
+          // ❌ Remove fallback mock so you can see the real error
+          document.getElementById("detailTitle").textContent =
+            "Movie not found";
+          return;
+        }
+
+        document.title = `${currentMovie.title} — CineBook`;
+        renderMovieDetail(currentMovie);
+        buildDateTabs();
+        loadShows();
+      }
+
+      // ── RENDER MOVIE DETAIL ──
+      function renderMovieDetail(m) {
+        document.getElementById("detailTitle").textContent = m.title || m.Name;
+
+        const poster = document.getElementById("detailPoster");
+        poster.textContent = m.emoji || "🎬";
+        if (m.image) {
+          const img = document.createElement("img");
+          // img.src = `http://localhost:3003/uploads/${m.image}`;
+          img.src = m.image?.startsWith("http")
+            ? m.image
+            : `https://cinebook-app.onrender.com/uploads/${m.image}`;
+          img.alt = m.title;
+          img.onerror = () => img.remove();
+          poster.appendChild(img);
+        }
+
+        const rating = m.rating || 4.2;
+        document.getElementById("detailMetaRow").innerHTML = `
+        <div class="detail-rating">
+          <span style="font-size:20px;color:var(--gold)">★</span>
+          <div>
+            <div class="detail-rating-num">${rating}</div>
+            <div class="detail-rating-label">/ 5.0 Stars</div>
+          </div>
+        </div>
+        <div class="detail-tag detail-tag-red">${m.genre || "Action"}</div>
+        <div class="detail-tag detail-tag-outline">${m.language || "Hindi"}</div>
+        <div class="detail-tag detail-tag-outline">UA</div>
+        <div class="detail-tag detail-tag-outline">2D / 3D</div>
+      `;
+
+        document.getElementById("detailDesc").textContent =
+          m.description || "An amazing cinematic experience awaits.";
+
+        document.getElementById("detailStats").innerHTML = `
+        <div class="detail-stat-item"><div class="lbl">Duration</div><div class="val">${Math.floor((m.duration || 120) / 60)}h ${(m.duration || 120) % 60}m</div></div>
+        <div class="detail-stat-item"><div class="lbl">Language</div><div class="val">${m.language || "Hindi"}</div></div>
+        <div class="detail-stat-item"><div class="lbl">Genre</div><div class="val">${m.genre || "Action"}</div></div>
+        <div class="detail-stat-item"><div class="lbl">Format</div><div class="val">2D / 3D</div></div>
+        <div class="detail-stat-item"><div class="lbl">Rating</div><div class="val">UA</div></div>
+      `;
+      }
+
+      // ── DATE TABS ──
+      let selectedDate = "";
+      function buildDateTabs() {
+        const tabs = document.getElementById("dateTabs");
+        const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const months = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+        const html = [];
+        for (let i = 0; i < 7; i++) {
+          const d = new Date();
+          d.setDate(d.getDate() + i);
+          const iso = d.toISOString().split("T")[0];
+          if (i === 0) selectedDate = iso;
+          const isToday = i === 0;
+          html.push(`
+          <div class="date-tab ${i === 0 ? "active" : ""}" onclick="selectDate('${iso}', this)">
+            <div class="date-tab-day">${isToday ? "Today" : days[d.getDay()]}</div>
+            <div class="date-tab-date">${String(d.getDate()).padStart(2, "0")}</div>
+            <div class="date-tab-month">${months[d.getMonth()]}</div>
+          </div>`);
+        }
+        tabs.innerHTML = html.join("");
+      }
+
+      function selectDate(date, el) {
+        selectedDate = date;
+        document
+          .querySelectorAll(".date-tab")
+          .forEach((t) => t.classList.remove("active"));
+        el.classList.add("active");
+        renderShows();
+      }
+
+      // ── SHOWS ──
+      async function loadShows() {
+        try {
+          // ── schedules ──
+          const r = await api("GET", "/show-schedule-public");
+          currentSchedules =
+            r.ok && r.data?.data?.length ? r.data.data : MOCK_SCHEDULES;
+
+          // ── cities ──
+          const cityRes = await api("GET", "/city");
+          const cities =
+            cityRes.data?.city || cityRes.data?.data || cityRes.data || [];
+
+          // ── theaters ──
+          const theaterRes = await api("GET", "/admin/theaters");
+          const theaters =
+            theaterRes.data?.theaters || theaterRes.data?.data || [];
+
+          const cityMap = {};
+          cities.forEach((c) => {
+            const cid = String(c.id || c._id || "");
+            cityMap[cid] = c.Name || c.name || "";
+          });
+          window.THEATER_CITY_MAP = {};
+          theaters.forEach((t) => {
+            const tid = String(t.id || t._id || "");
+            const cid = String(
+              t.city_id || t.CityId || t.cityId || t.City_Id || "",
+            );
+            window.THEATER_CITY_MAP[tid] = cityMap[cid] || "";
+            console.log(
+              `Theater: ${t.name}, city_id: ${cid}, resolved: ${cityMap[cid]}`,
+            ); // DEBUG
+          });
+
+          // ── inject city dropdown in navbar ──
+          const cityNames = [
+            ...new Set(Object.values(window.THEATER_CITY_MAP).filter(Boolean)),
+          ].sort();
+          const navRight = document.getElementById("navRight");
+          const existing = document.getElementById("navCityWrap");
+          if (existing) existing.remove();
+
+          const cityDiv = document.createElement("div");
+          cityDiv.id = "navCityWrap";
+          cityDiv.style.cssText =
+            "display:flex;align-items:center;gap:8px;margin-right:12px;";
+          cityDiv.innerHTML = `
+            <span style="font-size:13px;color:var(--muted)">📍</span>
+            <select
+              id="navCitySelect"
+              onchange="onCityChange()"
+              style="background:#111;color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;outline:none;"
+            >
+              <option value="">All Cities</option>
+              ${cityNames.map((c) => `<option value="${c}">${c}</option>`).join("")}
+            </select>`;
+          navRight.prepend(cityDiv);
+
+          renderShows();
+        } catch (err) {
+          console.error("LOAD SHOW ERROR:", err);
+          currentSchedules = MOCK_SCHEDULES;
+          renderShows();
+        }
+      }
+
+      let selectedCity = "";
+      function onCityChange() {
+        selectedCity = document.getElementById("navCitySelect")?.value || "";
+        renderShows();
+      }
+      
+      function renderShows() {
+        const grid = document.getElementById("showsGrid");
+
+        // 1. Filter by this movie — movieId check robust કરો
+        let forDate = currentSchedules.filter((s) => {
+          const schedMovieId =
+            s.movieId ?? s.movie_id ?? s.movie?.id ?? s.Movie?.id;
+          return String(schedMovieId) === String(movieId);
+        });
+
+        // 2. Filter by date — timezone-safe
+        forDate = forDate.filter((s) => {
+          if (!s.date) return true;
+          const schedDate = s.date.split("T")[0]; // "2026-05-25T00:00:00.000Z" → "2026-05-25"
+          return schedDate === selectedDate;
+        });
+
+        // 3. Filter by city
+        if (selectedCity) {
+          // DEBUG — આ console માં જુઓ
+          console.log("selectedCity:", selectedCity);
+          console.log(
+            "Sample schedule city data:",
+            forDate[0]?.screen?.theater?.city,
+          );
+          console.log("THEATER_CITY_MAP:", window.THEATER_CITY_MAP);
+
+          forDate = forDate.filter((s) => {
+            const cityName =
+              s.screen?.theater?.city?.Name ||
+              s.screen?.theater?.city?.name ||
+              window.THEATER_CITY_MAP?.[String(s.screen?.theater?.id)] ||
+              "";
+            console.log(
+              "Schedule city resolved:",
+              cityName,
+              "vs selectedCity:",
+              selectedCity,
+            );
+            return cityName === selectedCity;
+          });
+        }
+
+        if (!forDate.length) {
+          grid.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">${selectedCity ? "📍" : "😞"}</div>
+      <div class="empty-state-title">${selectedCity ? `No shows in ${selectedCity}` : "No shows available"}</div>
+      <div class="empty-state-sub">Try a different date or city</div>
+    </div>`;
+          return;
+        }
+
+        // Group by theater
+        const byTheater = {};
+        forDate.forEach((s) => {
+          const theaterName = s.screen?.theater?.name || "Unknown Theater";
+          if (!byTheater[theaterName]) byTheater[theaterName] = [];
+          byTheater[theaterName].push(s);
+        });
+
+        grid.innerHTML = Object.entries(byTheater)
+          .map(([theater, shows]) => {
+            const firstShow = shows[0];
+            const cityLabel =
+              firstShow.screen?.theater?.city?.Name ||
+              firstShow.screen?.theater?.city?.name ||
+              window.THEATER_CITY_MAP?.[
+                String(firstShow.screen?.theater?.id)
+              ] ||
+              "";
+
+            return `
+      <div class="theater-block">
+        <div class="theater-block-name">
+          🏢 ${theater}
+          ${cityLabel ? `<span style="font-size:12px;color:var(--muted);font-weight:400;margin-left:6px;">📍 ${cityLabel}</span>` : ""}
+        </div>
+        <div class="show-times-row">
+          ${shows
+            .map((s) => {
+              const startTime = s.timesheet?.startTime || "10:00";
+              const totalSeats = s.screen?.capacity || 120;
+              const booked = s.bookedSeats?.length || 0;
+              const avail = totalSeats - booked;
+              const pctFull = booked / totalSeats;
+              const availClass =
+                avail <= 0 ? "none" : pctFull > 0.7 ? "low" : "good";
+              const availText =
+                avail <= 0
+                  ? "Sold Out"
+                  : pctFull > 0.7
+                    ? "Filling Fast"
+                    : `${avail} Available`;
+              return `
+            <div class="show-time-btn ${avail <= 0 ? "sold-out" : ""}"
+              onclick="${avail <= 0 ? "" : `openSeatModal('${s.id}')`}">
+              <div class="show-time">${startTime}</div>
+              <div class="show-avail ${availClass}">${availText}</div>
+              <div class="show-price">₹${s.price || "—"}</div>
+            </div>`;
+            })
+            .join("")}
+        </div>
+      </div>`;
+          })
+          .join("");
+      }
+
+      // SEAT TYPES — dynamic based on capacity rows
+      // Will be set per modal open based on how many rows the screen has
+      const BASE_SEAT_TYPES = {
+        gold: { priceMultiplier: 1.0, label: "⭐ Gold", color: "gold" },
+        premium: {
+          priceMultiplier: 1.6,
+          label: "💎 Premium",
+          color: "premium",
+        },
+        sofa: { priceMultiplier: 2.4, label: "🛋 Sofa", color: "sofa" },
+      };
+
+      let SEAT_TYPES = {
+        gold: {
+          rows: ["A", "B", "C", "D", "E", "F"],
+          price: 200,
+          label: "⭐ Gold",
+        },
+        premium: {
+          rows: ["G", "H", "I", "J"],
+          price: 400,
+          label: "💎 Premium",
+        },
+        sofa: { rows: ["K", "L"], price: 600, label: "🛋 Sofa" },
+      };
+
+      function buildSeatTypes(ROWS, basePrice) {
+        const total = ROWS.length;
+        // bottom 15% sofa, next 30% premium, rest gold
+        const sofaCount = Math.max(1, Math.floor(total * 0.15));
+        const premiumCount = Math.max(1, Math.floor(total * 0.3));
+        const goldCount = total - sofaCount - premiumCount;
+
+        const goldRows = ROWS.slice(0, goldCount);
+        const premiumRows = ROWS.slice(goldCount, goldCount + premiumCount);
+        const sofaRows = ROWS.slice(goldCount + premiumCount);
+
+        return {
+          gold: { rows: goldRows, price: basePrice, label: "⭐ Gold" },
+          premium: {
+            rows: premiumRows,
+            price: Math.round(basePrice * 1.6),
+            label: "💎 Premium",
+          },
+          sofa: {
+            rows: sofaRows,
+            price: Math.round(basePrice * 2.4),
+            label: "🛋 Sofa",
+          },
+        };
+      }
+
+      function getRowType(row) {
+        for (const [type, cfg] of Object.entries(SEAT_TYPES)) {
+          if (cfg.rows.includes(row)) return type;
+        }
+        return "premium"; // fallback
+      }
+
+      function openSeatModal(schedId) {
+        if (!Auth.isLoggedIn()) {
+          showToast("Please sign in to book tickets", "error");
+          openAuthModal("login");
+          return;
+        }
+
+        selectedSched = currentSchedules.find((s) => String(s.id) === schedId);
+        if (!selectedSched) return;
+        pickedSeats = [];
+
+        const totalSeats = selectedSched.screen?.capacity || 80;
+        const basePrice = selectedSched.price || 200;
+        const COLS = 10;
+        const totalRows = Math.ceil(totalSeats / COLS);
+
+        // Generate row labels A-Z then AA, AB...
+        const ROWS = Array.from({ length: totalRows }, (_, i) => {
+          if (i < 26) return String.fromCharCode(65 + i);
+          return (
+            String.fromCharCode(65 + Math.floor(i / 26) - 1) +
+            String.fromCharCode(65 + (i % 26))
+          );
+        });
+
+        // Build dynamic seat types based on capacity
+        SEAT_TYPES = buildSeatTypes(ROWS, basePrice);
+
+        const bookedSet = new Set(selectedSched.bookedSeats || []);
+
+        const seatsHtml = ROWS.map((row, rowIndex) => {
+          const isLastRow = rowIndex === ROWS.length - 1;
+          const seatsInThisRow = isLastRow ? totalSeats % COLS || COLS : COLS;
+          const rowType = getRowType(row);
+
+          const seats = Array.from({ length: seatsInThisRow }, (_, i) => {
+            const id = `${row}${i + 1}`;
+            const isBooked = bookedSet.has(id);
+            const cls = isBooked ? "booked" : rowType;
+            const price = SEAT_TYPES[rowType].price;
+            return `<div
+              class="seat ${cls}"
+              data-id="${id}"
+              data-type="${rowType}"
+              data-price="${price}"
+              onclick="toggleSeat(this,'${id}')"
+            >${i + 1}</div>`;
+          });
+
+          if (seatsInThisRow > 5) {
+            seats.splice(5, 0, '<div class="seat-aisle"></div>');
+          }
+
+          return `<div class="seat-row">
+            <div class="seat-row-lbl">${row}</div>
+            ${seats.join("")}
+          </div>`;
+        }).join("");
+
+        const typeBannersHtml = Object.entries(SEAT_TYPES)
+          .map(
+            ([key, cfg]) =>
+              `<div class="type-badge ${key}">${cfg.label} — ₹${cfg.price}</div>`,
+          )
+          .join("");
+
+        const overlay = document.createElement("div");
+        overlay.className = "modal-overlay";
+        overlay.id = "__seatModal";
+        overlay.innerHTML = `
+          <div class="modal-box wide seat-modal" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeSeatModal()">✕</button>
+            <div class="modal-title">Select Your Seats</div>
+            <div class="modal-subtitle">
+              ${selectedSched.screen?.theater?.name || "Theater"} ·
+              ${selectedSched.screen?.name || "Screen 1"} ·
+              ${selectedSched.timesheet?.startTime || "—"}
+              <span style="margin-left:8px;color:var(--muted);font-size:12px">(${totalSeats} seats)</span>
+            </div>
+
+            <div class="seat-type-banner">${typeBannersHtml}</div>
+
+            <div class="screen-curve"><div class="screen-label">Screen</div></div>
+
+            <div class="seat-grid" id="seatGrid">${seatsHtml}</div>
+
+            <div class="seat-legend">
+              <div class="legend-item"><div class="legend-box gold"></div> Gold</div>
+              <div class="legend-item"><div class="legend-box premium"></div> Premium</div>
+              <div class="legend-item"><div class="legend-box sofa"></div> Sofa</div>
+              <div class="legend-item"><div class="legend-box picked"></div> Selected</div>
+              <div class="legend-item"><div class="legend-box booked"></div> Booked</div>
+            </div>
+
+            <div class="booking-summary">
+              <div class="summary-row"><span>Selected Seats</span><span id="sumSeats">None</span></div>
+              <div class="summary-row"><span>Seat Breakdown</span><span id="sumBreakdown">—</span></div>
+              <div class="summary-row"><span>Convenience fee (4%)</span><span id="sumFee">₹0</span></div>
+              <div class="summary-total-row"><span>Total Payable</span><span id="sumTotal">₹0</span></div>
+            </div>
+
+            <button class="btn-submit" id="confirmBookBtn" onclick="confirmBooking()">
+              CONFIRM BOOKING →
+            </button>
+          </div>`;
+
+        overlay.addEventListener("click", closeSeatModal);
+        document.body.appendChild(overlay);
+        updateSeatSummary();
+      }
+
+      function closeSeatModal() {
+        const m = document.getElementById("__seatModal");
+        if (m) m.remove();
+      }
+
+      function toggleSeat(el, id) {
+        if (el.classList.contains("booked")) return;
+
+        const type = el.dataset.type; // sofa / gold / premium
+
+        if (el.classList.contains("picked")) {
+          el.classList.remove("picked");
+          el.classList.add(type);
+          pickedSeats = pickedSeats.filter((s) => s !== id);
+        } else {
+          if (pickedSeats.length >= 8) {
+            showToast("Maximum 8 seats per booking", "error");
+            return;
+          }
+          el.classList.remove(type);
+          el.classList.add("picked");
+          pickedSeats.push(id);
+        }
+        updateSeatSummary();
+      }
+
+      function updateSeatSummary() {
+        let subtotal = 0;
+        const breakdown = {}; // { sofa: {count, total}, gold: {...}, premium: {...} }
+
+        pickedSeats.forEach((id) => {
+          const el = document.querySelector(`.seat[data-id="${id}"]`);
+          if (!el) return;
+          const type = el.dataset.type;
+          const price = parseInt(el.dataset.price, 10);
+          subtotal += price;
+          if (!breakdown[type]) breakdown[type] = { count: 0, total: 0 };
+          breakdown[type].count++;
+          breakdown[type].total += price;
+        });
+
+        const fee = Math.round(subtotal * 0.04);
+        const total = subtotal + fee;
+
+        document.getElementById("sumSeats").textContent = pickedSeats.length
+          ? pickedSeats.join(", ")
+          : "None";
+
+        // Breakdown string like: "Sofa×1 ₹600  Gold×2 ₹800"
+        const breakdownStr = Object.entries(breakdown)
+          .map(
+            ([type, { count, total }]) =>
+              `${SEAT_TYPES[type].label.replace(/[🛋⭐💎] /, "")}×${count} ₹${total}`,
+          )
+          .join("  ");
+        document.getElementById("sumBreakdown").textContent =
+          breakdownStr || "—";
+
+        document.getElementById("sumFee").textContent = `₹${fee}`;
+        document.getElementById("sumTotal").textContent = `₹${total}`;
+      }
+
+      async function confirmBooking() {
+        if (!pickedSeats.length) {
+          showToast("Please select at least one seat", "error");
+          return;
+        }
+
+        const user = Auth.user();
+        setLoading("confirmBookBtn", true, "Booking...");
+
+        const r = await api("POST", "/booking", {
+          schedule_id: selectedSched.id,
+          user_id: user?.id || user?._id,
+          seats_no: pickedSeats.length,
+          seats: pickedSeats, // seat IDs API ne joiye toh
+        });
+
+        setLoading("confirmBookBtn", false);
+
+        if (r.ok) {
+          // Calculate actual total from picked seats
+          let subtotal = 0;
+          pickedSeats.forEach((id) => {
+            const el = document.querySelector(`.seat[data-id="${id}"]`);
+            if (el) subtotal += parseInt(el.dataset.price, 10);
+          });
+          const total = subtotal + Math.round(subtotal * 0.04);
+
+          closeSeatModal();
+          showToast(
+            `🎉 Booked! Seats: ${pickedSeats.join(", ")} · ₹${total} paid`,
+            "success",
+          );
+          pickedSeats = [];
+        } else {
+          showToast(r.error || "Booking failed. Please try again.", "error");
+        }
+      }
+
+      function setStarRating(val) {
+        starRating = val;
+        document.querySelectorAll(".star-btn").forEach((b, i) => {
+          b.classList.toggle("lit", i < val);
+        });
+      }
+
+      async function submitRating() {
+        if (!Auth.isLoggedIn()) {
+          showToast("Please sign in to rate", "error");
+          openAuthModal("login");
+          return;
+        }
+        if (!starRating) {
+          showToast("Please select a star rating", "error");
+          return;
+        }
+        const user = Auth.user();
+        console.log("USER:", JSON.stringify(user));
+        console.log("MOVIE ID:", movieId, typeof movieId);
+        console.log("Debug — user:", user, "movieId:", movieId); // remove after fix
+
+        const r = await api("POST", "/rating", {
+          movie_id: parseInt(movieId),
+          user_id: parseInt(user?.id || user?._id),
+          rating: starRating,
+          review: document.getElementById("reviewText").value.trim(),
+        });
+        setLoading("ratingBtn", false);
+        if (r.ok) {
+          showToast("Rating submitted! Thank you ⭐", "success");
+          setStarRating(0);
+          starRating = 0;
+          document.getElementById("reviewText").value = "";
+        } else {
+          showToast(r.error || "Failed to submit rating", "error");
+        }
+      }
+
+      // Init
+      initShared();
+      renderNav();
+      loadMovie();
+    </script>
+  </body>
+</html>

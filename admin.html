@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineBook — Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .upload-preview {
+        width: 100%;
+        aspect-ratio: 2/1;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--surface2);
+        display: none;
+        margin-top: 10px;
+      }
+      .upload-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .schedule-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(42, 42, 42, 0.6);
+      }
+      .schedule-item:last-child {
+        border-bottom: none;
+      }
+      .sched-time-badge {
+        background: rgba(220, 30, 30, 0.1);
+        border: 1px solid rgba(220, 30, 30, 0.25);
+        color: var(--red);
+        padding: 5px 12px;
+        border-radius: 4px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .sched-info {
+        flex: 1;
+      }
+      .sched-movie {
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .sched-meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .sched-price {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--green);
+      }
+      .theater-card {
+        background: var(--surface2);
+        border: 1px solid rgba(42, 42, 42, 0.8);
+        border-radius: 10px;
+        padding: 20px;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          transform 0.15s;
+        position: relative;
+        overflow: hidden;
+      }
+      .theater-card:hover {
+        border-color: var(--red);
+        transform: translateY(-2px);
+      }
+      .theater-card.linked {
+        border-color: var(--green);
+        background: rgba(34, 197, 94, 0.05);
+      }
+      .theater-card-name {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .theater-card-address {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 12px;
+        line-height: 1.5;
+      }
+      .theater-card-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: rgba(220, 30, 30, 0.15);
+        border: 1px solid rgba(220, 30, 30, 0.3);
+        color: var(--red);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 4px;
+      }
+      .theater-card.linked .theater-card-badge {
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: var(--green);
+      }
+      .form-select {
+        width: 100%;
+        padding: 14px 16px;
+        background: var(--surface2);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        color: white;
+        font-size: 15px;
+        outline: none;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+
+        background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 18px;
+      }
+      .nav-dash-btn {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="closeSidebar()"
+    ></div>
+    <div id="toast-root"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="logo" onclick="window.location.href = 'index.html'">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">CINE<em>BOOK</em></span>
+        </div>
+        <div class="nav-links">
+          <a class="nav-link" href="index.html">← Movies</a>
+          <span class="nav-link active">Admin</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div id="navRight"></div>
+        <button
+          class="sidebar-toggle-btn"
+          id="sidebarToggleBtn"
+          onclick="toggleSidebar()"
+        >
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- DASHBOARD SHELL -->
+    <div class="dash-shell">
+      <!-- SIDEBAR -->
+      <div class="dash-sidebar">
+        <div class="dash-sidebar-section">
+          <div class="dash-sidebar-label">Overview</div>
+          <div
+            class="dash-nav-item active"
+            onclick="switchPanel('pDashboard', this)"
+          >
+            <span class="dash-nav-icon">📊</span> Dashboard
+          </div>
+        </div>
+        <div class="dash-sidebar-section">
+          <div class="dash-sidebar-label">Content</div>
+          <div class="dash-nav-item" onclick="switchPanel('pAddMovie', this)">
+            <span class="dash-nav-icon">🎬</span> Add Movie
+          </div>
+          <div
+            class="dash-nav-item"
+            onclick="
+              switchPanel('pLinkTheater', this);
+              loadAllTheaters();
+            "
+          >
+            <span class="dash-nav-icon">🏢</span> My Theater
+          </div>
+          <div
+            class="dash-nav-item"
+            onclick="switchPanel('pCreateScreen', this)"
+          >
+            <span class="dash-nav-icon">🖥</span> Create Screen
+          </div>
+        </div>
+        <div class="dash-sidebar-section">
+          <div class="dash-sidebar-label">Scheduling</div>
+          <div class="dash-nav-item" onclick="switchPanel('pTimesheet', this)">
+            <span class="dash-nav-icon">⏰</span> Timesheets
+          </div>
+          <div class="dash-nav-item" onclick="switchPanel('pSchedule', this)">
+            <span class="dash-nav-icon">📅</span> Schedule Show
+          </div>
+          <div
+            class="dash-nav-item"
+            onclick="
+              switchPanel('pViewSchedules', this);
+              loadSchedules();
+            "
+          >
+            <span class="dash-nav-icon">📋</span> View Schedules
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="dash-main">
+        <!-- ═══ DASHBOARD ═══ -->
+        <div class="dash-panel active" id="pDashboard">
+          <div class="dash-page-title">DASHBOARD</div>
+          <div class="dash-page-sub">
+            Welcome back, Admin. Here's your theater overview.
+          </div>
+
+          <div class="stat-cards">
+            <div class="stat-card red">
+              <div class="stat-num" id="s_movies">—</div>
+              <div class="stat-label">Total Movies</div>
+              <div class="stat-icon">🎬</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-num" id="s_schedules">—</div>
+              <div class="stat-label">Active Shows</div>
+              <div class="stat-icon">📅</div>
+            </div>
+            <div class="stat-card gold">
+              <div class="stat-num" id="s_screens">—</div>
+              <div class="stat-label">Screens</div>
+              <div class="stat-icon">🖥</div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-num" id="s_bookings">—</div>
+              <div class="stat-label">Bookings Today</div>
+              <div class="stat-icon">🎟</div>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title">Today's Shows</div>
+              <button class="btn btn-red btn-sm" onclick="loadDashboardShows()">
+                ↻ Refresh
+              </button>
+            </div>
+            <div id="dashSchedulesList">
+              <div class="empty-state">
+                <div class="empty-state-icon">⏳</div>
+                <div class="empty-state-title">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ ADD MOVIE ═══ -->
+        <div class="dash-panel" id="pAddMovie">
+          <div class="dash-page-title">ADD MOVIE</div>
+          <div class="dash-page-sub">
+            Upload a new movie to the platform with poster and details.
+          </div>
+
+          <div class="form-card">
+            <div class="form-card-title">🎬 Movie Details</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Movie Title *</label>
+                <input
+                  type="text"
+                  id="mTitle"
+                  class="form-input"
+                  placeholder="e.g. Inception"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Genre *</label>
+                <select id="mGenre" class="form-select">
+                  <option>Action</option>
+                  <option>Drama</option>
+                  <option>Comedy</option>
+                  <option>Sci-Fi</option>
+                  <option>Thriller</option>
+                  <option>Horror</option>
+                  <option>Romance</option>
+                  <option>Animation</option>
+                  <option>Documentary</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Duration (minutes) *</label>
+                <input
+                  type="number"
+                  id="mDuration"
+                  class="form-input"
+                  placeholder="148"
+                  min="1"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Language *</label>
+                <select id="mLanguage" class="form-select">
+                  <option>Hindi</option>
+                  <option>English</option>
+                  <option>Tamil</option>
+                  <option>Telugu</option>
+                  <option>Malayalam</option>
+                  <option>Kannada</option>
+                  <option>Bengali</option>
+                  <option>Marathi</option>
+                </select>
+              </div>
+              <div class="form-group col-span-2">
+                <label class="form-label">Description</label>
+                <textarea
+                  id="mDesc"
+                  class="form-textarea"
+                  rows="3"
+                  placeholder="Brief synopsis of the movie..."
+                ></textarea>
+              </div>
+              <div class="form-group col-span-2">
+                <label class="form-label">Movie Poster *</label>
+                <div
+                  class="file-drop"
+                  id="posterDrop"
+                  onclick="document.getElementById('mPoster').click()"
+                >
+                  <input
+                    type="file"
+                    id="mPoster"
+                    name="image"
+                    accept="image/*"
+                    onchange="previewPoster(this)"
+                  />
+                  <div class="file-drop-icon">🖼</div>
+                  <div class="file-drop-text">
+                    Click or drag & drop your poster image
+                  </div>
+                  <div class="file-drop-hint">
+                    JPG, PNG, WebP · Max 5MB · Recommended: 2:3 ratio
+                  </div>
+                  <div class="file-selected" id="posterName"></div>
+                </div>
+                <div class="upload-preview" id="posterPreview">
+                  <img id="posterPreviewImg" src="" alt="Preview" />
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 8px">
+              <button
+                class="btn btn-red"
+                onclick="doAddMovie()"
+                id="addMovieBtn"
+              >
+                Add Movie 🎬
+              </button>
+              <button class="btn btn-ghost" onclick="resetMovieForm()">
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ MY THEATER ═══ -->
+        <div class="dash-panel" id="pLinkTheater">
+          <div class="dash-page-title">MY THEATER</div>
+          <div class="dash-page-sub">
+            Select a theater below to link it to your admin account.
+          </div>
+
+          <div
+            style="
+              display: flex;
+              justify-content: flex-end;
+              margin-bottom: 16px;
+            "
+          >
+            <button class="btn btn-red btn-sm" onclick="loadAllTheaters()">
+              ↻ Refresh
+            </button>
+          </div>
+
+          <div
+            id="theaterCardsGrid"
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+              gap: 20px;
+            "
+          >
+            <div class="empty-state">
+              <div class="empty-state-icon">⏳</div>
+              <div class="empty-state-title">Loading theaters...</div>
+            </div>
+          </div>
+
+          <!-- hidden, still used internally -->
+          <input type="hidden" id="linkTheaterId" />
+        </div>
+
+        <!-- ═══ CREATE SCREEN ═══ -->
+        <div class="dash-panel" id="pCreateScreen">
+          <div class="dash-page-title">CREATE SCREEN</div>
+          <div class="dash-page-sub">
+            Add a new screen / auditorium to your theater.
+          </div>
+          <div class="form-card" style="max-width: 560px">
+            <div class="form-card-title">🖥 New Screen</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Screen Name *</label>
+                <input
+                  type="text"
+                  id="scrName"
+                  class="form-input"
+                  placeholder="e.g. Screen 1, Audi Gold"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Seating Capacity *</label>
+                <input
+                  type="number"
+                  id="scrCapacity"
+                  class="form-input"
+                  placeholder="120"
+                  min="1"
+                />
+              </div>
+              <div class="form-group col-span-2">
+                <label class="form-label">Theater Name *</label>
+                <!-- <input
+                  type="text"
+                  id="scrTheaterId"
+                  class="form-input"
+                  placeholder="MongoDB Theater ObjectId"
+                /> -->
+                <select id="scrTheaterId" class="form-select">
+                  <option value="">Select Theater</option>
+                </select>
+              </div>
+            </div>
+            <button
+              class="btn btn-red"
+              onclick="doCreateScreen()"
+              id="createScreenBtn"
+            >
+              Create Screen 🖥
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ TIMESHEET ═══ -->
+        <div class="dash-panel" id="pTimesheet">
+          <div class="dash-page-title">TIMESHEETS</div>
+          <div class="dash-page-sub">
+            Define show time slots used when scheduling movies.
+          </div>
+          <div class="form-card" style="max-width: 480px">
+            <div class="form-card-title">⏰ Add Time Slot</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Start Time *</label>
+                <input
+                  type="time"
+                  id="tsStart"
+                  class="form-input"
+                  value="09:00"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">End Time *</label>
+                <input
+                  type="time"
+                  id="tsEnd"
+                  class="form-input"
+                  value="12:00"
+                />
+              </div>
+            </div>
+            <button
+              class="btn btn-red"
+              onclick="doCreateTimesheet()"
+              id="timesheetBtn"
+            >
+              Save Timesheet ⏰
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ SCHEDULE ═══ -->
+        <div class="dash-panel" id="pSchedule">
+          <div class="dash-page-title">SCHEDULE SHOW</div>
+          <div class="dash-page-sub">
+            Assign a movie to a screen with a specific date and time slot.
+          </div>
+          <div class="form-card">
+            <div class="form-card-title">📅 Create Show Schedule</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Select Movie *</label>
+                <select id="schMovieId" class="form-select">
+                  <option value="">Select Movie</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select Theater *</label>
+                <select id="schTheaterId" class="form-select">
+                  <option value="">Select Theater</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select Screen *</label>
+                <select id="schScreenId" class="form-select">
+                  <option value="">Select Screen</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select Timesheet *</label>
+                <select id="schTimesheetId" class="form-select">
+                  <option value="">Select Timesheet</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Show Date *</label>
+                <input type="date" id="schDate" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ticket Price (₹) *</label>
+                <input
+                  type="number"
+                  id="schPrice"
+                  class="form-input"
+                  placeholder="250"
+                  min="1"
+                />
+              </div>
+              <div
+                class="form-group"
+                style="display: flex; align-items: flex-end"
+              >
+                <button
+                  class="btn btn-red"
+                  onclick="doCreateSchedule()"
+                  id="scheduleBtn"
+                  style="width: 100%"
+                >
+                  Create Schedule 📅
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ VIEW SCHEDULES ═══ -->
+        <div class="dash-panel" id="pViewSchedules">
+          <div class="dash-page-title">ALL SCHEDULES</div>
+          <div class="dash-page-sub">
+            View all show schedules for your theater.
+          </div>
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title">Show Schedules</div>
+              <button class="btn btn-red btn-sm" onclick="loadSchedules()">
+                ↻ Refresh
+              </button>
+            </div>
+            <div id="schedulesTable">
+              <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <div class="empty-state-title">Loading schedules...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.dash-main -->
+    </div>
+    <!-- /.dash-shell -->
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="footer-logo">CINE<em>BOOK</em></div>
+      <div class="footer-copy">
+        All Rights Reserved and Developed by Vrutik Sidapara
+      </div>
+      <div class="footer-copy">
+        © 2026 CineBook. Built for movie lovers across India.
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+      // ─────────────────────────────────────
+      // ADMIN PAGE
+      // ─────────────────────────────────────
+
+      // ── DASHBOARD ──
+      //     async function loadDashboardShows() {
+      //       document.getElementById("dashSchedulesList").innerHTML =
+      //         '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-title">Loading...</div></div>';
+      //       const r = await api("GET", "/admin/show-schedule");
+      //       // const schedules =
+      //       //   r.ok && r.data?.schedules?.length
+      //       //     ? r.data.schedules
+      //       //     : [
+      //       //         {
+      //       //           movie: "Pathaan",
+      //       //           screen: "Screen 1",
+      //       //           startTime: "10:00",
+      //       //           endTime: "13:00",
+      //       //           date: "Today",
+      //       //           price: 250,
+      //       //           bookedSeats: 23,
+      //       //           totalSeats: 120,
+      //       //         },
+      //       //         {
+      //       //           movie: "KGF Chapter 2",
+      //       //           screen: "Screen 3",
+      //       //           startTime: "14:30",
+      //       //           endTime: "17:30",
+      //       //           date: "Today",
+      //       //           price: 300,
+      //       //           bookedSeats: 89,
+      //       //           totalSeats: 100,
+      //       //         },
+      //       //         {
+      //       //           movie: "Vikram",
+      //       //           screen: "Screen 2",
+      //       //           startTime: "19:00",
+      //       //           endTime: "22:00",
+      //       //           date: "Today",
+      //       //           price: 200,
+      //       //           bookedSeats: 12,
+      //       //           totalSeats: 150,
+      //       //         },
+      //       //       ];
+
+      //       // ✅ Fix
+      //       const schedules =
+      //         // r.ok && r.data?.data?.length ? r.data.data : [...fallback];
+      //         r.ok && Array.isArray(r.data?.data) ? r.data.data : [];
+
+      //       document.getElementById("s_schedules").textContent = schedules.length;
+      //       document.getElementById("s_movies").textContent = schedules.length + 4;
+      //       document.getElementById("s_screens").textContent = 5;
+      //       document.getElementById("s_bookings").textContent = schedules.reduce(
+      //         (a, s) => a + (s.bookedSeats?.length || s.bookedSeats || 0),
+      //         0,
+      //       );
+
+      //       document.getElementById("dashSchedulesList").innerHTML = schedules
+      //         .map(
+      //           (s) => `
+      //   <div class="schedule-item">
+      //     <div class="sched-time-badge">${s.timesheet?.startTime || s.startTime || "10:00"}</div>
+      //     <div class="sched-info">
+      //       <div class="sched-movie">${s.movie?.Name || s.movie?.title || s.movieId || "Movie"}</div>
+      //       <div class="sched-meta">${s.screen?.name || s.screenId || "Screen"} · ${s.date || "Today"} · .../${s.screen?.capacity || s.totalSeats || 120} seats booked</div>
+      //     </div>
+      //     <div class="sched-price">₹${s.price || 250}</div>
+      //     <span class="pill pill-green">Active</span>
+      //   </div>
+      // `,
+      //         )
+      //         .join("");
+      //     }
+
+      async function loadDashboardShows() {
+        document.getElementById("dashSchedulesList").innerHTML =
+          `<div class="empty-state">
+      <div class="empty-state-icon">⏳</div>
+      <div class="empty-state-title">Loading...</div>
+    </div>`;
+
+        try {
+          const r = await api("GET", "/admin/show-schedule");
+
+          console.log("API RESPONSE:", r);
+
+          const schedules =
+            r.ok && Array.isArray(r.data?.data) ? r.data.data : [];
+
+          document.getElementById("s_schedules").textContent = schedules.length;
+          document.getElementById("s_movies").textContent = schedules.length;
+          // document.getElementById("s_screens").textContent = 5;
+          const uniqueScreens = [
+            ...new Set(
+              schedules.map(
+                (s) => s.screen?.name || s.screen?.screen_name || s.screenName,
+              ),
+            ),
+          ];
+
+          document.getElementById("s_screens").textContent =
+            uniqueScreens.length;
+
+          document.getElementById("s_bookings").textContent = schedules.reduce(
+            (a, s) => a + (s.bookedSeats?.length || 0),
+            0,
+          );
+
+          // ✅ if no data
+          if (!schedules.length) {
+            document.getElementById("dashSchedulesList").innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <div class="empty-state-title">No schedules found</div>
+        </div>
+      `;
+            return;
+          }
+
+          document.getElementById("dashSchedulesList").innerHTML = schedules
+            .map(
+              (s) => `
+        <div class="schedule-item">
+          <div class="sched-time-badge">
+            ${s.timesheet?.startTime || "10:00"}
+          </div>
+
+          <div class="sched-info">
+            <div class="sched-movie">
+              ${s.movie?.Name || "Movie"}
+            </div>
+
+            <div class="sched-meta">
+              ${
+                s.screen?.name ||
+                s.screen?.screen_name ||
+                s.screenName ||
+                "Screen"
+              }.
+              ${s.date || "Today"} ·
+              ${s.bookedSeats?.length || 0}/
+              ${s.screen?.capacity || 120} seats booked
+            </div>
+          </div>
+
+          <div class="sched-price">
+            ₹${s.price || 250}
+          </div>
+
+          <span class="pill pill-green">Active</span>
+        </div>
+      `,
+            )
+            .join("");
+        } catch (error) {
+          console.error(error);
+
+          document.getElementById("dashSchedulesList").innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">❌</div>
+        <div class="empty-state-title">Failed to load data</div>
+      </div>
+    `;
+        }
+      }
+
+      // ── ADD MOVIE ──
+      function previewPoster(input) {
+        const file = input.files[0];
+        if (!file) return;
+        document.getElementById("posterName").textContent = `✓ ${file.name}`;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          document.getElementById("posterPreview").style.display = "block";
+          document.getElementById("posterPreviewImg").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function resetMovieForm() {
+        ["mTitle", "mDuration", "mDesc"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
+        document.getElementById("posterName").textContent = "";
+        document.getElementById("mPoster").value = "";
+        document.getElementById("posterPreview").style.display = "none";
+      }
+
+      async function doAddMovie() {
+        const title = document.getElementById("mTitle").value.trim();
+        const genre = document.getElementById("mGenre").value;
+        const duration = document.getElementById("mDuration").value;
+        const language = document.getElementById("mLanguage").value;
+        const desc = document.getElementById("mDesc").value.trim();
+        const file = document.getElementById("mPoster").files[0];
+
+        if (!title || !duration) {
+          showToast("Movie title and duration are required", "error");
+          return;
+        }
+
+        if (!file) {
+          showToast("Please upload a poster image", "error");
+          return;
+        }
+
+        const fd = new FormData();
+        fd.append("Name", title);
+        fd.append("genre", genre);
+        fd.append("Duration", duration);
+        fd.append("language", language);
+        fd.append("Description", desc || " ");
+        fd.append("image", file);
+
+        setLoading("addMovieBtn", true, "Uploading...");
+
+        try {
+          const r = await api("POST", "/admin/movie", fd, true);
+
+          if (r.ok) {
+            showToast(`"${title}" added successfully! 🎬`, "success");
+            resetMovieForm();
+          } else {
+            showToast(r.error || "Failed to add movie", "error");
+          }
+        } catch (err) {
+          console.error("ERROR:", err);
+          showToast(err.message || "Something went wrong", "error"); // Fix 2
+        } finally {
+          setLoading("addMovieBtn", false); // Fix 1 — હંમેશા run થશે
+        }
+      }
+      let linkedTheaterId = null;
+
+      async function loadAllTheaters() {
+        const grid = document.getElementById("theaterCardsGrid");
+        grid.innerHTML = `<div class="empty-state">
+    <div class="empty-state-icon">⏳</div>
+    <div class="empty-state-title">Loading theaters...</div>
+  </div>`;
+
+        // Find which theater this admin is already linked to
+        const myR = await api("GET", "/admin/theater");
+        linkedTheaterId = myR.ok && myR.data?.id ? myR.data.id : null;
+
+        const r = await api("GET", "/admin/theaters");
+        const theaters = r.data?.theaters;
+        if (!r.ok || !theaters?.length) {
+          grid.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">🏢</div>
+      <div class="empty-state-title">No theaters found</div>
+      <div class="empty-state-sub">Ask your Super Admin to create a theater first</div>
+    </div>`;
+          return;
+        }
+
+        grid.innerHTML = theaters
+          // grid.innerHTML = r.data.theaters
+          .map((t) => {
+            const id = t._id || t.id;
+            const isLinked = linkedTheaterId && id === linkedTheaterId;
+            return `
+      <div class="theater-card ${isLinked ? "linked" : ""}"
+           onclick="selectTheater('${id}', '${t.name}', this)">
+        <div class="theater-card-badge">${isLinked ? "✓ Linked" : "#" + (t.number ?? String(id).slice(-4))}</div>
+        <div class="theater-card-name">${t.name}</div>
+        <div class="theater-card-address">📍 ${t.address || t.city || "—"}</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="pill ${t.isActive !== false ? "pill-green" : "pill-muted"}">
+            ${t.isActive !== false ? "Active" : "Inactive"}
+          </span>
+          ${
+            isLinked
+              ? '<span class="pill pill-green">Your Theater</span>'
+              : '<span class="pill pill-muted">Click to Link</span>'
+          }
+        </div>
+      </div>`;
+          })
+          .join("");
+      }
+
+      async function selectTheater(theaterId, theaterName, cardEl) {
+        if (!confirm(`Link your account to "${theaterName}"?`)) return;
+
+        const r = await api("POST", "/admin/theater", { theaterId });
+        if (r.ok) {
+          showToast(`Linked to "${theaterName}" successfully! 🏢`, "success");
+          linkedTheaterId = theaterId;
+          document.getElementById("linkTheaterId").value = theaterId;
+
+          // Update all card styles
+          document.querySelectorAll(".theater-card").forEach((c) => {
+            c.classList.remove("linked");
+            c.querySelector(".theater-card-badge").textContent =
+              "Click to Link";
+          });
+          cardEl.classList.add("linked");
+          cardEl.querySelector(".theater-card-badge").textContent = "✓ Linked";
+        } else {
+          showToast(r.error || "Failed to link theater", "error");
+        }
+      }
+
+      async function loadTheaterDropdown() {
+        try {
+          const response = await api("GET", "/admin/theaters");
+
+          console.log("THEATER RESPONSE:", response);
+
+          const theaters = response.data.theaters;
+
+          const select = document.getElementById("scrTheaterId");
+
+          select.innerHTML = `
+      <option value="">Select Theater</option>
+    `;
+
+          theaters.forEach((theater) => {
+            select.innerHTML += `
+        <option value="${theater.id}">
+          ${theater.name}
+        </option>
+      `;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function loadMyTheater() {
+        loadAllTheaters();
+      }
+
+      // // ── CREATE SCREEN ──
+      async function doCreateScreen() {
+        const name = document.getElementById("scrName").value.trim();
+        const capacity = document.getElementById("scrCapacity").value;
+        const theaterId = document.getElementById("scrTheaterId").value.trim();
+        if (!name || !capacity || !theaterId) {
+          showToast("All fields are required", "error");
+          return;
+        }
+        if (Number(capacity) < 1 || Number(capacity) > 500) {
+          showToast("Capacity must be between 1 and 500", "error");
+          return;
+        }
+        setLoading("createScreenBtn", true, "Creating...");
+        const r = await api("POST", "/admin/screen", {
+          name,
+          capacity: Number(capacity),
+          theaterId,
+        });
+        setLoading("createScreenBtn", false);
+        if (r.ok) {
+          showToast(
+            `Screen "${name}" created with ${capacity} seats! 🖥`,
+            "success",
+          );
+          document.getElementById("scrName").value = "";
+          document.getElementById("scrCapacity").value = "";
+          // reload screen dropdown
+          loadScreenDropdown();
+        } else {
+          showToast(r.error || "Failed to create screen", "error");
+        }
+      }
+
+      // ── TIMESHEET ──
+      async function doCreateTimesheet() {
+        const startTime = document.getElementById("tsStart").value + ":00";
+        const endTime = document.getElementById("tsEnd").value + ":00";
+        if (!startTime || !endTime) {
+          showToast("Start and end times are required", "error");
+          return;
+        }
+        if (endTime <= startTime) {
+          showToast("End time must be after start time", "error");
+          return;
+        }
+        setLoading("timesheetBtn", true, "Saving...");
+        const r = await api("POST", "/admin/timesheet", { startTime, endTime });
+        // ✅ FIX: send snake_case keys + append :00 for Sequelize TIME format
+        // const r = await api("POST", "/admin/timesheet", {
+        //   start_time: startTime + ":00",
+        //   end_time: endTime + ":00",
+        // });
+        setLoading("timesheetBtn", false);
+        if (r.ok) {
+          showToast(`Timesheet ${startTime}–${endTime} saved! ⏰`, "success");
+        } else {
+          showToast(r.error || "Failed to save timesheet", "error");
+        }
+      }
+
+      // ── SCHEDULE ──
+      async function doCreateSchedule() {
+        const movieId = document.getElementById("schMovieId").value.trim();
+        const screenId = document.getElementById("schScreenId").value.trim();
+        const timesheetId = document
+          .getElementById("schTimesheetId")
+          .value.trim();
+        const date = document.getElementById("schDate").value;
+        const price = document.getElementById("schPrice").value;
+
+        if (!movieId || !screenId || !timesheetId || !date || !price) {
+          showToast("All fields are required", "error");
+          return;
+        }
+        setLoading("scheduleBtn", true, "Scheduling...");
+        const r = await api("POST", "/admin/schedule", {
+          movieId,
+          screenId,
+          timesheetId,
+          date,
+          price: Number(price),
+        });
+        setLoading("scheduleBtn", false);
+        if (r.ok) {
+          showToast("Show scheduled successfully! 📅", "success");
+          [
+            "schMovieId",
+            "schScreenId",
+            "schTimesheetId",
+            "schDate",
+            "schPrice",
+          ].forEach((id) => (document.getElementById(id).value = ""));
+        } else {
+          showToast(r.error || "Failed to create schedule", "error");
+        }
+      }
+
+      // ── VIEW SCHEDULES ──
+      async function loadSchedules() {
+        const wrap = document.getElementById("schedulesTable");
+        wrap.innerHTML =
+          '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-title">Loading...</div></div>';
+
+        const r = await api("GET", "/admin/show-schedule");
+
+        // ✅ FIX 1: controller returns r.data as array, not r.data.schedules
+        const schedules = r.ok && r.data?.data?.length ? r.data.data : null;
+
+        console.log("API response:", r);
+        console.log("r.data:", r.data);
+        console.log("r.data.data:", r.data?.data);
+
+        if (!schedules) {
+          wrap.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-title">No schedules yet</div>
+      <div class="empty-state-sub">Create your first schedule in the Schedule Show panel</div>
+    </div>`;
+          return;
+        }
+
+        wrap.innerHTML = `<table class="data-table">
+    <thead>
+      <tr>
+        <th>Movie</th><th>City</th><th>Theater</th><th>Screen</th><th>Time</th><th>Date</th><th>Price</th><th>Seats</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${schedules
+        .map((s) => {
+          const booked = s.bookedSeats?.length || 0;
+          const total = s.screen?.capacity || 120;
+          const pct = Math.round((booked / total) * 100);
+          return `<tr>
+          <td><strong>${s.movie?.Name || "—"}</strong></td>
+          <td>${s.screen?.theater?.city?.Name || s.screen?.theater?.city?.name || "—"}</td>
+          <td>${s.screen?.theater?.name || "—"}</td>
+          <td>${s.screen?.name || "—"}</td>
+          <td><span class="pill pill-muted">
+            ${s.timesheet?.startTime || "—"} – ${s.timesheet?.endTime || "—"}
+          </span></td>
+          <td>${fmtDate(s.date)}</td>
+          <td style="font-weight:600">₹${s.price || "—"}</td>
+          <td>${booked}/${total}
+            <span style="color:var(--muted);font-size:12px">(${pct}%)</span>
+          </td>
+          <td><span class="pill ${pct >= 90 ? "pill-red" : pct >= 60 ? "pill-gold" : "pill-green"}">
+            ${pct >= 90 ? "Full" : pct >= 60 ? "Filling" : "Open"}
+          </span></td>
+        </tr>`;
+        })
+        .join("")}
+    </tbody>
+  </table>`;
+      }
+
+      async function loadMovieDropdown() {
+        try {
+          const response = await api("GET", "/admin/movie");
+
+          const movies = response.data.data;
+
+          const select = document.getElementById("schMovieId");
+
+          select.innerHTML = `
+      <option value="">Select Movie</option>
+    `;
+
+          movies.forEach((movie) => {
+            select.innerHTML += `
+        <option value="${movie.id}">
+          ${movie.Name}
+        </option>
+      `;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function loadScheduleTheaters() {
+        try {
+          const response = await api("GET", "/admin/theaters");
+
+          const theaters = response.data.theaters;
+
+          const select = document.getElementById("schTheaterId");
+
+          select.innerHTML = `
+      <option value="">Select Theater</option>
+    `;
+
+          theaters.forEach((theater) => {
+            select.innerHTML += `
+        <option value="${theater.id}">
+          ${theater.name}
+        </option>
+      `;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function loadScreenDropdown() {
+        try {
+          const response = await api("GET", "/admin/screen");
+
+          const screens = response.data.data;
+
+          const select = document.getElementById("schScreenId");
+
+          select.innerHTML = `
+      <option value="">Select Screen</option>
+    `;
+
+          screens.forEach((screen) => {
+            select.innerHTML += `
+        <option value="${screen.id}">
+          ${screen.name}
+        </option>
+      `;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      async function loadTimesheetDropdown() {
+        try {
+          const response = await api("GET", "/admin/timesheet");
+
+          const timesheets = response.data.data;
+
+          const select = document.getElementById("schTimesheetId");
+
+          select.innerHTML = `
+      <option value="">Select Timesheet</option>
+    `;
+
+          timesheets.forEach((t) => {
+            select.innerHTML += `
+        <option value="${t.id}">
+          ${t.startTime} - ${t.endTime}
+        </option>
+      `;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.querySelector(".dash-sidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+        const btn = document.getElementById("sidebarToggleBtn");
+        const shell = document.querySelector(".dash-shell");
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("open");
+        btn.classList.toggle("open");
+        shell.classList.toggle("sidebar-open");
+      }
+
+      function closeSidebar() {
+        const sidebar = document.querySelector(".dash-sidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+        const btn = document.getElementById("sidebarToggleBtn");
+        const shell = document.querySelector(".dash-shell");
+        sidebar.classList.remove("open");
+        overlay.classList.remove("open");
+        btn.classList.remove("open");
+        shell.classList.remove("sidebar-open");
+      }
+
+      document.querySelectorAll(".dash-nav-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          if (window.innerWidth <= 768) closeSidebar();
+        });
+      });
+
+      // ── INIT ──
+      initShared();
+      renderNav();
+      document.getElementById("schDate").value = todayISO();
+      loadDashboardShows();
+      loadMyTheater();
+      setupFileDrop("posterDrop", "mPoster", "posterName");
+      loadTheaterDropdown();
+      loadMovieDropdown();
+      loadScheduleTheaters();
+      loadScreenDropdown();
+      loadTimesheetDropdown();
+    </script>
+  </body>
+</html>

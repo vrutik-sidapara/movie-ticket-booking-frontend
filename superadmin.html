@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CineBook — Super Admin</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .theater-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .theater-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 22px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .theater-card:hover {
+        border-color: var(--border2);
+        transform: translateY(-2px);
+      }
+      .theater-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--red);
+      }
+      .theater-card-name {
+        font-family: "Barlow Condensed", sans-serif;
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+      .theater-card-city {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .theater-card-addr {
+        font-size: 12px;
+        color: var(--muted2);
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+      .theater-card-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .city-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 18px;
+        margin: 6px;
+      }
+      .city-chip-name {
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .city-chip-state {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .city-chips-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        margin: -6px;
+      }
+      .nav-dash-btn {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      class="sidebar-overlay"
+      id="sidebarOverlay"
+      onclick="closeSidebar()"
+    ></div>
+    <div id="toast-root"></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-left">
+        <a class="logo" href="index.html">
+          <!-- <span class="logo-icon">🎬</span>CINE<em>BOOK</em> -->
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">CINE<em>BOOK</em></span>
+        </a>
+        <div class="nav-links">
+          <a class="nav-link" href="index.html">← Home</a>
+          <span class="nav-link active">👑 Super Admin</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <div id="navRight"></div>
+        <button
+          class="sidebar-toggle-btn"
+          id="sidebarToggleBtn"
+          onclick="toggleSidebar()"
+        >
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- SHELL -->
+    <div class="dash-shell">
+      <!-- SIDEBAR -->
+      <div class="dash-sidebar">
+        <div class="dash-sidebar-section">
+          <div class="dash-sidebar-label">Overview</div>
+          <div
+            class="dash-nav-item active"
+            onclick="switchPanel('pSADashboard', this)"
+          >
+            <span class="dash-nav-icon">📊</span> Dashboard
+          </div>
+        </div>
+        <div class="dash-sidebar-section">
+          <div class="dash-sidebar-label">Cities</div>
+          <div class="dash-nav-item" onclick="switchPanel('pAddCity', this)">
+            <span class="dash-nav-icon">🌆</span> Add City
+          </div>
+          <div class="dash-nav-item" onclick="switchPanel('pViewCities', this)">
+            <span class="dash-nav-icon">📍</span> All Cities
+          </div>
+        </div>
+        <div class="dash-sidebar-section">
+          <div class="dash-sidebar-label">Theaters</div>
+          <div class="dash-nav-item" onclick="switchPanel('pAddTheater', this)">
+            <span class="dash-nav-icon">🏢</span> Create Theater
+          </div>
+          <div
+            class="dash-nav-item"
+            onclick="
+              switchPanel('pViewTheaters', this);
+              loadTheaters();
+            "
+          >
+            <span class="dash-nav-icon">📋</span> All Theaters
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN -->
+      <div class="dash-main">
+        <!-- ═══ SA DASHBOARD ═══ -->
+        <div class="dash-panel active" id="pSADashboard">
+          <div class="dash-page-title">SUPER ADMIN</div>
+          <div class="dash-page-sub">
+            Platform-level control — Cities, Theaters and Admins.
+          </div>
+
+          <div class="stat-cards">
+            <div class="stat-card red">
+              <div class="stat-num" id="sa_theaters">—</div>
+              <div class="stat-label">Total Theaters</div>
+              <div class="stat-icon">🏢</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-num" id="sa_cities">—</div>
+              <div class="stat-label">Cities</div>
+              <div class="stat-icon">🌆</div>
+            </div>
+            <div class="stat-card gold">
+              <div class="stat-num" id="sa_admins">—</div>
+              <div class="stat-label">Active Admins</div>
+              <div class="stat-icon">👤</div>
+            </div>
+            <div class="stat-card blue">
+              <div class="stat-num" id="sa_screens">—</div>
+              <div class="stat-label">Total Screens</div>
+              <div class="stat-icon">🖥</div>
+            </div>
+          </div>
+
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title">Theaters Overview</div>
+              <button class="btn btn-red btn-sm" onclick="loadSADashboard()">
+                ↻ Refresh
+              </button>
+            </div>
+            <div id="saTheatersPreview">
+              <div class="empty-state">
+                <div class="empty-state-icon">⏳</div>
+                <div class="empty-state-title">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ ADD CITY ═══ -->
+        <div class="dash-panel" id="pAddCity">
+          <div class="dash-page-title">ADD CITY</div>
+          <div class="dash-page-sub">
+            Add a new city where theaters can be created.
+          </div>
+          <div class="form-card" style="max-width: 520px">
+            <div class="form-card-title">🌆 New City</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">City Name *</label>
+                <input
+                  type="text"
+                  id="cityName"
+                  class="form-input"
+                  placeholder="e.g. Mumbai"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">State / Province</label>
+                <input
+                  type="text"
+                  id="cityState"
+                  class="form-input"
+                  placeholder="e.g. Maharashtra"
+                />
+              </div>
+            </div>
+            <button class="btn btn-red" onclick="doAddCity()" id="addCityBtn">
+              Add City 🌆
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ VIEW CITIES ═══ -->
+        <div class="dash-panel" id="pViewCities">
+          <div class="dash-page-title">ALL CITIES</div>
+          <div class="dash-page-sub">
+            Cities available on the CineBook platform.
+          </div>
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title">Cities</div>
+              <button class="btn btn-red btn-sm" onclick="loadCities()">
+                ↻ Refresh
+              </button>
+            </div>
+            <div id="citiesContainer">
+              <div class="empty-state">
+                <div class="empty-state-icon">🌆</div>
+                <div class="empty-state-title">Loading cities...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ ADD THEATER ═══ -->
+        <div class="dash-panel" id="pAddTheater">
+          <div class="dash-page-title">CREATE THEATER</div>
+          <div class="dash-page-sub">
+            Create a new theater and optionally assign an admin to manage it.
+          </div>
+          <div class="form-card">
+            <div class="form-card-title">🏢 New Theater</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label">Theater Name *</label>
+                <input
+                  type="text"
+                  id="thName"
+                  class="form-input"
+                  placeholder="e.g. PVR Cinemas Phoenix"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Select City *</label>
+                <!-- <input
+                  type="text"
+                  id="thCityId"
+                  class="form-input"
+                  placeholder="MongoDB City ObjectId"
+                /> -->
+                <select id="thCityId" class="form-input">
+                  <option value="">Select City</option>
+                </select>
+              </div>
+              <div class="form-group col-span-2">
+                <label class="form-label">Full Address *</label>
+                <input
+                  type="text"
+                  id="thAddress"
+                  class="form-input"
+                  placeholder="e.g. Phoenix Mall, Lower Parel, Mumbai 400013"
+                />
+              </div>
+              <div class="form-group col-span-2">
+                <label class="form-label"
+                  >Admin User ID
+                  <span style="color: var(--muted); font-weight: 400"
+                    >(optional — assign later)</span
+                  ></label
+                >
+                <input
+                  type="text"
+                  id="thAdminId"
+                  class="form-input"
+                  placeholder="MongoDB User ObjectId of the admin"
+                />
+              </div>
+            </div>
+            <button
+              class="btn btn-red"
+              onclick="doCreateTheater()"
+              id="createTheaterBtn"
+            >
+              Create Theater 🏢
+            </button>
+          </div>
+        </div>
+
+        <!-- ═══ VIEW THEATERS ═══ -->
+        <div class="dash-panel" id="pViewTheaters">
+          <div class="dash-page-title">ALL THEATERS</div>
+          <div class="dash-page-sub">
+            Manage all theaters on the CineBook platform.
+          </div>
+
+          <!-- Edit Modal trigger area -->
+          <div class="theater-grid" id="theatersGrid">
+            <div class="empty-state" style="grid-column: 1/-1">
+              <div class="empty-state-icon">🏢</div>
+              <div class="empty-state-title">Loading theaters...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /.dash-main -->
+    </div>
+
+    <!-- EDIT THEATER MODAL (hidden) -->
+    <div id="editTheaterModal" style="display: none">
+      <div class="modal-box wide" onclick="event.stopPropagation()">
+        <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+        <div class="modal-title">Edit Theater</div>
+        <div class="modal-subtitle" id="editModalSub">
+          Update theater details below
+        </div>
+        <input type="hidden" id="editTheaterId" />
+        <div class="form-grid-2" style="margin-bottom: 16px">
+          <div class="form-group">
+            <label class="form-label">Theater Name</label>
+            <input type="text" id="editThName" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">City ID</label>
+            <input type="text" id="editThCityId" class="form-input" />
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Address</label>
+            <input type="text" id="editThAddress" class="form-input" />
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Admin ID</label>
+            <input type="text" id="editThAdminId" class="form-input" />
+          </div>
+        </div>
+        <button
+          class="btn-submit"
+          id="editTheaterSaveBtn"
+          onclick="doUpdateTheater()"
+        >
+          SAVE CHANGES →
+        </button>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="footer-logo">CINE<em>BOOK</em></div>
+      <div class="footer-copy">
+        All Rights Reserved and Developed by Vrutik Sidapara
+      </div>
+      <div class="footer-copy">
+        © 2026 CineBook. Built for movie lovers across India.
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+
+      const MOCK_THEATERS = [
+        {
+          _id: "t1",
+          name: "PVR Cinemas Phoenix",
+          city: "Mumbai",
+          address: "Phoenix Mall, Lower Parel, Mumbai 400013",
+          adminId: "64abc123",
+        },
+        {
+          _id: "t2",
+          name: "INOX Multiplex",
+          city: "Delhi",
+          address: "Select Citywalk Mall, Saket, Delhi 110017",
+          adminId: "64def456",
+        },
+        {
+          _id: "t3",
+          name: "Cinepolis VR Chennai",
+          city: "Chennai",
+          address: "VR Mall, Anna Nagar, Chennai 600040",
+          adminId: null,
+        },
+        {
+          _id: "t4",
+          name: "PVR Gold Bangalore",
+          city: "Bangalore",
+          address: "Orion Mall, Rajajinagar, Bangalore 560010",
+          adminId: "64ghi789",
+        },
+        {
+          _id: "t5",
+          name: "Suraj Cineplex",
+          city: "Junagadh",
+          address:
+            "GF55+773, College Rd, Gandhi Gram, Junagadh, Gujarat 362001",
+          adminId: null,
+        },
+      ];
+
+      // ── SA DASHBOARD ──
+      async function loadSADashboard() {
+        const [citiesRes, theatersRes] = await Promise.all([
+          api("GET", "/superadmin/cities"),
+          api("GET", "/superadmin/theater"),
+        ]);
+
+        const cities = citiesRes.data?.data || [];
+        const theaters = theatersRes.data?.data || [];
+
+        // Stat cards
+        document.getElementById("sa_theaters").textContent = theaters.length;
+        document.getElementById("sa_cities").textContent = cities.length;
+        document.getElementById("sa_admins").textContent = theaters.filter(
+          (t) => t.admin_id || t.adminId,
+        ).length;
+        document.getElementById("sa_screens").textContent = theaters.reduce(
+          (sum, t) => sum + (t.screens?.length || t.screen_count || 0),
+          0,
+        );
+
+        // City id → name lookup
+        const cityMap = {};
+        cities.forEach((c) => {
+          cityMap[c.id] = c.Name || c.name;
+        });
+
+        // Theater table
+        document.getElementById("saTheatersPreview").innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Theater</th>
+          <th>City</th>
+          <th>Admin Assigned</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${
+          theaters.length
+            ? theaters
+                .map((t) => {
+                  const name = t.name || t.Name || "—";
+                  const city = cityMap[t.city_id || t.CityId] || t.city || "—";
+                  const hasAdmin = !!(t.admin_id || t.adminId);
+                  return `<tr>
+            <td><strong>${name}</strong></td>
+            <td><span class="pill pill-muted">${city}</span></td>
+            <td>${
+              hasAdmin
+                ? `<span class="pill pill-green">✓ Assigned</span>`
+                : `<span class="pill pill-gold">Unassigned</span>`
+            }
+            </td>
+            <td><span class="pill pill-green">Active</span></td>
+          </tr>`;
+                })
+                .join("")
+            : `
+          <tr>
+            <td colspan="4" style="text-align:center;padding:40px;color:#888">
+              No theaters added yet.
+            </td>
+          </tr>`
+        }
+      </tbody>
+    </table>
+  `;
+      }
+      // ── ADD CITY ──
+      async function doAddCity() {
+        const name = document.getElementById("cityName").value.trim();
+        const state = document.getElementById("cityState").value.trim();
+        if (!name) {
+          showToast("City name is required", "error");
+          return;
+        }
+        setLoading("addCityBtn", true, "Adding...");
+        const r = await api("POST", "/superadmin/city", { name, state });
+        setLoading("addCityBtn", false);
+        if (r.ok) {
+          showToast(`"${name}" added to cities! 🌆`, "success");
+          document.getElementById("cityName").value = "";
+          document.getElementById("cityState").value = "";
+        } else {
+          showToast(r.error || "Failed to add city", "error");
+        }
+      }
+
+      async function loadCities() {
+        const wrap = document.getElementById("citiesContainer");
+        wrap.innerHTML =
+          '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-title">Loading...</div></div>';
+
+        const r = await api("GET", "/superadmin/cities");
+
+        // ── PASTE THIS IN CONSOLE TO DEBUG ──
+        console.log("r =", r);
+        console.log("r.ok =", r.ok);
+        console.log("r.data =", r.data);
+        console.log("r.data.data =", r.data?.data);
+        console.log("typeof r.data =", typeof r.data);
+        console.log("Array.isArray(r.data) =", Array.isArray(r.data));
+        console.log(
+          "Array.isArray(r.data?.data) =",
+          Array.isArray(r.data?.data),
+        );
+
+        // Try every possible shape
+        const cities = Array.isArray(r.data)
+          ? r.data // { data: [...] }
+          : Array.isArray(r.data?.data)
+            ? r.data.data // { data: { data: [...] } }
+            : Array.isArray(r.data?.cities)
+              ? r.data.cities // { data: { cities: [...] } }
+              : [];
+
+        console.log("Final cities array =", cities);
+
+        if (!cities.length) {
+          wrap.innerHTML =
+            '<div class="empty-state"><div class="empty-state-icon">🌆</div><div class="empty-state-title">No cities added yet</div></div>';
+          return;
+        }
+
+        wrap.innerHTML = `<div class="city-chips-wrap" style="padding:16px">
+    ${cities
+      .map(
+        (c) => `<div class="city-chip">
+      <span style="font-size:20px">🌆</span>
+      <div>
+        <div class="city-chip-name">${c.Name || c.name}</div>
+        <div class="city-chip-state">${c.State || c.state || "—"}</div>
+      </div>
+    </div>`,
+      )
+      .join("")}
+  </div>`;
+      }
+
+      // ── CREATE THEATER ──
+      async function doCreateTheater() {
+        const name = document.getElementById("thName").value.trim();
+        const cityId = document.getElementById("thCityId").value.trim();
+        const address = document.getElementById("thAddress").value.trim();
+        const adminId = document.getElementById("thAdminId").value.trim();
+        if (!name || !cityId || !address) {
+          showToast("Name, City ID and Address are required", "error");
+          return;
+        }
+        const payload = { name, city_id: cityId, address };
+        if (adminId) payload.adminId = adminId;
+        setLoading("createTheaterBtn", true, "Creating...");
+        const r = await api("POST", "/superadmin/theater", payload);
+        setLoading("createTheaterBtn", false);
+        if (r.ok) {
+          showToast(`Theater "${name}" created! 🏢`, "success");
+          ["thName", "thCityId", "thAddress", "thAdminId"].forEach(
+            (id) => (document.getElementById(id).value = ""),
+          );
+        } else {
+          showToast(r.error || "Failed to create theater", "error");
+        }
+      }
+
+      async function loadCitiesDropdown() {
+        try {
+          const response = await api("GET", "/superadmin/cities");
+
+          const cities = response.data.data;
+
+          const select = document.getElementById("thCityId");
+
+          select.innerHTML = `
+      <option value="">Select City</option>
+    `;
+
+          cities.forEach((city) => {
+            select.innerHTML += `
+        <option value="${city.id}">
+          ${city.Name}
+        </option>
+      `;
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.querySelector(".dash-sidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+        const btn = document.getElementById("sidebarToggleBtn");
+        const shell = document.querySelector(".dash-shell");
+
+        sidebar.classList.toggle("open");
+        overlay.classList.toggle("open");
+        btn.classList.toggle("open");
+        shell.classList.toggle("sidebar-open");
+      }
+
+      function closeSidebar() {
+        const sidebar = document.querySelector(".dash-sidebar");
+        const overlay = document.getElementById("sidebarOverlay");
+        const btn = document.getElementById("sidebarToggleBtn");
+        const shell = document.querySelector(".dash-shell");
+
+        sidebar.classList.remove("open");
+        overlay.classList.remove("open");
+        btn.classList.remove("open");
+        shell.classList.remove("sidebar-open"); // ← હવે કામ કરશે
+      }
+
+      document.querySelectorAll(".dash-nav-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          if (window.innerWidth <= 768) closeSidebar();
+        });
+      });
+
+      // ── VIEW THEATERS ──
+      async function loadTheaters() {
+        const grid = document.getElementById("theatersGrid");
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+    <div class="empty-state-icon">⏳</div><div class="empty-state-title">Loading theaters...</div>
+  </div>`;
+        const r = await api("GET", "/superadmin/theater");
+        // const theaters =
+        //   r.ok && r.data?.theaters?.length ? r.data.theaters : MOCK_THEATERS;
+        const theaters = Array.isArray(r.data)
+          ? r.data
+          : Array.isArray(r.data?.theaters)
+            ? r.data.theaters
+            : Array.isArray(r.data?.data)
+              ? r.data.data
+              : [];
+
+        if (!theaters.length) {
+          grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-state-icon">🏢</div>
+      <div class="empty-state-title">No theaters yet</div>
+      <div class="empty-state-sub">Create your first theater above</div>
+    </div>`;
+          return;
+        }
+
+        grid.innerHTML = theaters
+          .map(
+            (t) => `
+    <div class="theater-card">
+      <div class="theater-card-name">${t.name}</div>
+      <div class="theater-card-city">📍 ${t.city || t.cityId || t.city_id || "Unknown City"}</div>
+      <div class="theater-card-addr">${t.address || "Address not set"}</div>
+      <div style="margin-bottom:16px">
+        ${
+          t.adminId
+            ? `<span class="pill pill-green">✓ Admin Assigned</span>`
+            : `<span class="pill pill-gold">No Admin</span>`
+        }
+        <span class="pill pill-green" style="margin-left:8px">Active</span>
+      </div>
+      <div class="theater-card-actions">
+        <button class="tbl-btn tbl-btn-edit" onclick="openEditModal('${t._id || t.id}','${t.name}','${t.cityId || ""}','${(t.address || "").replace(/'/g, "\\'")}','${t.adminId || ""}')">✏ Edit</button>
+        <button class="tbl-btn tbl-btn-delete" onclick="doDeleteTheater('${t._id || t.id}','${t.name}')">🗑 Delete</button>
+        <button class="tbl-btn tbl-btn-edit" style="margin-left:auto" onclick="viewTheaterById('${t._id}')">View →</button>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      // ── EDIT THEATER ──
+      let _editOverlay = null;
+
+      function openEditModal(id, name, cityId, address, adminId) {
+        document.getElementById("editTheaterId").value = id;
+        document.getElementById("editThName").value = name;
+        document.getElementById("editThCityId").value = cityId;
+        document.getElementById("editThAddress").value = address;
+        document.getElementById("editThAdminId").value = adminId;
+        document.getElementById("editModalSub").textContent =
+          `Editing: ${name}`;
+
+        const modalContent =
+          document.getElementById("editTheaterModal").innerHTML;
+        _editOverlay = document.createElement("div");
+        _editOverlay.className = "modal-overlay";
+        _editOverlay.innerHTML = `<div class="modal-box wide" onclick="event.stopPropagation()">
+    <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+    <div class="modal-title">Edit Theater</div>
+    <div class="modal-subtitle">Editing: <strong>${name}</strong></div>
+    <input type="hidden" id="editId2" value="${id}"/>
+    <div class="form-grid-2" style="margin-bottom:16px">
+      <div class="form-group"><label class="form-label">Theater Name</label><input type="text" id="editN" class="form-input" value="${name}"/></div>
+      <div class="form-group"><label class="form-label">City ID</label><input type="text" id="editC" class="form-input" value="${cityId}"/></div>
+      <div class="form-group col-span-2"><label class="form-label">Address</label><input type="text" id="editA" class="form-input" value="${address}"/></div>
+      <div class="form-group col-span-2"><label class="form-label">Admin ID</label><input type="text" id="editAd" class="form-input" value="${adminId}"/></div>
+    </div>
+    <button class="btn-submit" id="editSaveBtn2" onclick="doUpdateTheater2()">SAVE CHANGES →</button>
+  </div>`;
+        _editOverlay.addEventListener("click", closeEditModal);
+        document.body.appendChild(_editOverlay);
+      }
+
+      function closeEditModal() {
+        if (_editOverlay) {
+          document.body.removeChild(_editOverlay);
+          _editOverlay = null;
+        }
+      }
+
+      async function doUpdateTheater2() {
+        const id = document.getElementById("editId2").value;
+        const name = document.getElementById("editN").value.trim();
+        const cityId = document.getElementById("editC").value.trim();
+        const address = document.getElementById("editA").value.trim();
+        const adminId = document.getElementById("editAd").value.trim();
+        if (!name) {
+          showToast("Theater name is required", "error");
+          return;
+        }
+        const payload = { name, city_id: cityId, address };
+        if (adminId) payload.adminId = adminId;
+        setLoading("editSaveBtn2", true, "Saving...");
+        const r = await api("PUT", `/superadmin/theater/${id}`, payload);
+        setLoading("editSaveBtn2", false);
+        if (r.ok) {
+          showToast("Theater updated! ✅", "success");
+          closeEditModal();
+          loadTheaters();
+        } else {
+          showToast(r.error || "Failed to update theater", "error");
+        }
+      }
+
+      // ── DELETE THEATER ──
+      async function doDeleteTheater(id, name) {
+        confirmAction(
+          `Are you sure you want to delete <strong>"${name}"</strong>? This cannot be undone and will remove all associated data.`,
+          async () => {
+            const r = await api("DELETE", `/superadmin/theater/${id}`);
+            if (r.ok) {
+              showToast(`"${name}" deleted`, "info");
+              loadTheaters();
+            } else {
+              showToast(r.error || "Failed to delete theater", "error");
+            }
+          },
+        );
+      }
+
+      // ── GET BY ID ──
+      async function viewTheaterById(id) {
+        const r = await api("GET", `/superadmin/theater/${id}`);
+        if (r.ok && r.data?.theater) {
+          const t = r.data.theater;
+          showToast(
+            `${t.name} · ${t.city || "City"} · ${t.address || ""}`,
+            "info",
+          );
+        } else {
+          showToast("Theater details not available from API", "info");
+        }
+      }
+
+      // Init
+      initShared();
+      renderNav();
+      loadSADashboard();
+      loadCitiesDropdown();
+    </script>
+  </body>
+</html>
