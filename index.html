@@ -656,7 +656,6 @@
         }
       }
 
-      /* Mobile 768px */
       @media (max-width: 768px) {
         .hero-stats {
           display: none !important;
@@ -664,37 +663,24 @@
         .hero {
           padding: 80px 20px 60px !important;
         }
-      }
-
-      /* Small Mobile 480px */
-      @media (max-width: 480px) {
-        .hero {
-          padding: 80px 16px 50px !important;
-        }
-      }
-      @media (max-width: 768px) {
-        /* City select compact */
         #idxCityWrap {
-          max-width: 80px !important;
+          display: none !important;
         }
-        #idxCitySelect {
-          width: 70px !important;
-          font-size: 10px !important;
-          padding: 5px 4px !important;
-        }
-
-        /* Sign In / Register compact */
         #navRight .btn {
           padding: 6px 10px !important;
           font-size: 11px !important;
           letter-spacing: 0 !important;
         }
-
-        /* nav-right */
         .nav-right {
           flex-shrink: 0;
           gap: 4px !important;
           overflow: visible !important;
+        }
+      }
+      /* Small Mobile 480px */
+      @media (max-width: 480px) {
+        .hero {
+          padding: 80px 16px 50px !important;
         }
       }
 
@@ -818,18 +804,17 @@
           <a class="nav-link" href="#" onclick="showComing()">Offers</a>
         </div>
       </div>
-      <div class="nav-right" id="navRight">
-        <!-- filled by JS -->
+      <div class="nav-right">
+        <div id="navRight"></div>
+        <button
+          class="nav-hamburger"
+          id="hamburgerBtn"
+          onclick="toggleMobileMenu()"
+        >
+          <span></span><span></span><span></span>
+        </button>
       </div>
-      <!-- ✅ Hamburger button add કરો -->
-      <button
-        class="nav-hamburger"
-        id="hamburgerBtn"
-        onclick="toggleMobileMenu()"
-      >
-        <span></span><span></span><span></span>
-      </button>
-      <!-- ✅ Mobile dropdown menu -->
+      <!-- Mobile dropdown menu -->
       <div class="nav-mobile-menu" id="mobileMenu">
         <a class="nav-mobile-link active" href="index.html">🎬 Movies</a>
         <a class="nav-mobile-link" href="#" onclick="showComing()">🎭 Events</a>
