@@ -663,9 +663,9 @@
         .hero {
           padding: 80px 20px 60px !important;
         }
-        #idxCityWrap {
+        /* #idxCityWrap {
           display: none !important;
-        }
+        } */
         #navRight .btn {
           padding: 6px 10px !important;
           font-size: 11px !important;
@@ -689,9 +689,9 @@
       }
 
       @media (max-width: 480px) {
-        #idxCityWrap {
-          display: none !important; /* city hide - hamburger menu ma already che */
-        }
+        /* #idxCityWrap {
+          display: none !important;
+        } */
         #navRight .btn {
           padding: 5px 8px !important;
           font-size: 10px !important;
@@ -1233,6 +1233,9 @@
               ${cityNames.map((c) => `<option value="${c}">${c}</option>`).join("")}
             </select>`;
           navRight.prepend(div);
+          // ✅ આ line add કરો
+          const isMobile = window.innerWidth < 448;
+          div.style.display = !isMobile || Auth.isLoggedIn() ? "flex" : "none";
         }
 
         // MOVIE COUNT
@@ -1379,6 +1382,24 @@
         if (!menu.contains(e.target) && !btn.contains(e.target)) {
           menu.classList.remove("open");
           btn.classList.remove("open");
+        }
+      });
+
+      const _origRenderNav = renderNav;
+      window.renderNav = function () {
+        _origRenderNav();
+        const wrap = document.getElementById("idxCityWrap");
+        if (wrap) {
+          const isMobile = window.innerWidth < 448;
+          wrap.style.display = !isMobile || Auth.isLoggedIn() ? "flex" : "none";
+        }
+      };
+
+      window.addEventListener("resize", () => {
+        const wrap = document.getElementById("idxCityWrap");
+        if (wrap) {
+          const isMobile = window.innerWidth < 448;
+          wrap.style.display = !isMobile || Auth.isLoggedIn() ? "flex" : "none";
         }
       });
 
