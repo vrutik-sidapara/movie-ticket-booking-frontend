@@ -1094,7 +1094,6 @@ body {
   }
 
   #idxCityWrap {
-    display: flex !important;
     flex-shrink: 1 !important;
     margin-right: 4px !important;
     max-width: 100px !important;
