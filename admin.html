@@ -186,6 +186,15 @@
           <div
             class="dash-nav-item"
             onclick="
+              switchPanel('pAllMovies', this);
+              loadAllMovies();
+            "
+          >
+            <span class="dash-nav-icon">🎞</span> All Movies
+          </div>
+          <div
+            class="dash-nav-item"
+            onclick="
               switchPanel('pLinkTheater', this);
               loadAllTheaters();
             "
@@ -371,6 +380,28 @@
               <button class="btn btn-ghost" onclick="resetMovieForm()">
                 Clear
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ ALL MOVIES ═══ -->
+        <div class="dash-panel" id="pAllMovies">
+          <div class="dash-page-title">ALL MOVIES</div>
+          <div class="dash-page-sub">
+            All movies available on the CineBook platform.
+          </div>
+          <div class="table-card">
+            <div class="table-header-bar">
+              <div class="table-title">Movies List</div>
+              <button class="btn btn-red btn-sm" onclick="loadAllMovies()">
+                ↻ Refresh
+              </button>
+            </div>
+            <div id="allMoviesTable">
+              <div class="empty-state">
+                <div class="empty-state-icon">🎬</div>
+                <div class="empty-state-title">Loading movies...</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1219,6 +1250,36 @@
           if (window.innerWidth <= 768) closeSidebar();
         });
       });
+
+      async function loadAllMovies() {
+        const wrap = document.getElementById("allMoviesTable");
+        wrap.innerHTML =
+          '<div class="empty-state"><div class="empty-state-icon">⏳</div><div class="empty-state-title">Loading...</div></div>';
+        try {
+          const r = await api("GET", "/admin/movie");
+          const movies = r.ok && r.data?.data?.length ? r.data.data : null;
+          if (!movies) {
+            wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🎬</div><div class="empty-state-title">No movies found</div></div>`;
+            return;
+          }
+          wrap.innerHTML = `<table class="data-table">
+      <thead><tr><th>Poster</th><th>Title</th><th>Genre</th><th>Duration</th><th>Language</th></tr></thead>
+      <tbody>${movies
+        .map(
+          (m) => `<tr>
+        <td><img src="${m.image || ""}" style="width:48px;height:64px;object-fit:cover;border-radius:4px"></td>
+        <td><strong>${m.Name || "—"}</strong></td>
+        <td><span class="pill pill-muted">${m.genre || "—"}</span></td>
+        <td>${m.Duration ? m.Duration + " min" : "—"}</td>
+        <td>${m.language || "—"}</td>
+      </tr>`,
+        )
+        .join("")}</tbody>
+    </table>`;
+        } catch (err) {
+          wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-title">Failed to load</div></div>`;
+        }
+      }
 
       // ── INIT ──
       initShared();
