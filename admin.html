@@ -1263,21 +1263,77 @@
             return;
           }
           wrap.innerHTML = `<table class="data-table">
-      <thead><tr><th>Poster</th><th>Title</th><th>Genre</th><th>Duration</th><th>Language</th></tr></thead>
-      <tbody>${movies
-        .map(
-          (m) => `<tr>
-        <td><img src="${m.image || ""}" style="width:48px;height:64px;object-fit:cover;border-radius:4px"></td>
-        <td><strong>${m.Name || "—"}</strong></td>
-        <td><span class="pill pill-muted">${m.genre || "—"}</span></td>
-        <td>${m.Duration ? m.Duration + " min" : "—"}</td>
-        <td>${m.language || "—"}</td>
-      </tr>`,
-        )
-        .join("")}</tbody>
+      <thead>
+        <tr>
+          <th>Poster</th><th>Title</th><th>Genre</th><th>Duration</th><th>Language</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${movies
+          .map(
+            (m) => `<tr>
+          <td><img src="${m.image || ""}" style="width:48px;height:64px;object-fit:cover;border-radius:4px"></td>
+          <td><strong>${m.Name || "—"}</strong></td>
+          <td><span class="pill pill-muted">${m.genre || "—"}</span></td>
+          <td>${m.Duration ? m.Duration + " min" : "—"}</td>
+          <td>${m.language || "—"}</td>
+          <td style="display:flex;gap:8px;">
+            <button class="btn btn-sm" style="background:#2a2a2a;border:1px solid #444;color:white" onclick="openEditModal(${JSON.stringify(m).replace(/"/g, "&quot;")})">✏️ Edit</button>
+            <button class="btn btn-sm btn-red" onclick="deleteMovie(${m.id}, '${m.Name}')">🗑 Delete</button>
+          </td>
+        </tr>`,
+          )
+          .join("")}
+      </tbody>
     </table>`;
         } catch (err) {
           wrap.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><div class="empty-state-title">Failed to load</div></div>`;
+        }
+      }
+
+      async function deleteMovie(id, name) {
+        if (!confirm(`"${name}" delete કરવી છે?`)) return;
+        const r = await api("DELETE", `/admin/movie/${id}`);
+        if (r.ok) {
+          showToast(`"${name}" deleted! 🗑`, "success");
+          loadAllMovies();
+        } else {
+          showToast(r.error || "Failed to delete", "error");
+        }
+      }
+
+      function openEditModal(movie) {
+        document.getElementById("editMovieId").value = movie.id;
+        document.getElementById("editTitle").value = movie.Name || "";
+        document.getElementById("editGenre").value = movie.genre || "Action";
+        document.getElementById("editDuration").value = movie.Duration || "";
+        document.getElementById("editLanguage").value =
+          movie.language || "Hindi";
+        document.getElementById("editDesc").value = movie.Description || "";
+        document.getElementById("editModal").style.display = "flex";
+      }
+
+      async function saveEditMovie() {
+        const id = document.getElementById("editMovieId").value;
+        const file = document.getElementById("editPoster").files[0];
+        const fd = new FormData();
+        fd.append("Name", document.getElementById("editTitle").value);
+        fd.append("genre", document.getElementById("editGenre").value);
+        fd.append("Duration", document.getElementById("editDuration").value);
+        fd.append("language", document.getElementById("editLanguage").value);
+        fd.append(
+          "Description",
+          document.getElementById("editDesc").value || " ",
+        );
+        if (file) fd.append("image", file);
+
+        const r = await api("PUT", `/admin/movie/${id}`, fd, true);
+        if (r.ok) {
+          showToast("Movie updated! ✏️", "success");
+          document.getElementById("editModal").style.display = "none";
+          loadAllMovies();
+        } else {
+          showToast(r.error || "Failed to update", "error");
         }
       }
 
@@ -1294,5 +1350,112 @@
       loadScreenDropdown();
       loadTimesheetDropdown();
     </script>
+
+    <!-- EDIT MOVIE MODAL -->
+    <div
+      id="editModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div
+        style="
+          background: #1a1a1a;
+          border: 1px solid #333;
+          border-radius: 12px;
+          padding: 32px;
+          width: 90%;
+          max-width: 500px;
+        "
+      >
+        <div style="font-size: 20px; font-weight: 700; margin-bottom: 20px">
+          ✏️ Edit Movie
+        </div>
+        <input type="hidden" id="editMovieId" />
+        <div class="form-group" style="margin-bottom: 12px">
+          <label class="form-label">Title</label>
+          <input type="text" id="editTitle" class="form-input" />
+        </div>
+        <div
+          class="form-grid-2"
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+          "
+        >
+          <div class="form-group">
+            <label class="form-label">Genre</label>
+            <select id="editGenre" class="form-select">
+              <option>Action</option>
+              <option>Drama</option>
+              <option>Comedy</option>
+              <option>Sci-Fi</option>
+              <option>Thriller</option>
+              <option>Horror</option>
+              <option>Romance</option>
+              <option>Animation</option>
+              <option>Documentary</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration (min)</label>
+            <input type="number" id="editDuration" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Language</label>
+            <select id="editLanguage" class="form-select">
+              <option>Hindi</option>
+              <option>English</option>
+              <option>Tamil</option>
+              <option>Telugu</option>
+              <option>Malayalam</option>
+              <option>Kannada</option>
+              <option>Bengali</option>
+              <option>Marathi</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Change Poster</label>
+            <input
+              type="file"
+              id="editPoster"
+              class="form-input"
+              accept="image/*"
+              style="padding: 8px"
+            />
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 20px">
+          <label class="form-label">Description</label>
+          <textarea
+            id="editDesc"
+            class="form-textarea"
+            rows="2"
+            maxlength="500"
+          ></textarea>
+        </div>
+        <div style="display: flex; gap: 12px">
+          <button class="btn btn-red" onclick="saveEditMovie()">
+            Save Changes
+          </button>
+          <button
+            class="btn btn-ghost"
+            onclick="
+              document.getElementById('editModal').style.display = 'none'
+            "
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
