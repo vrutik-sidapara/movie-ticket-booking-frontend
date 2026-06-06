@@ -711,47 +711,48 @@
       //     }
 
       async function loadDashboardShows() {
-        document.getElementById("dashSchedulesList").innerHTML =
-          `<div class="empty-state">
+        document.getElementById("dashSchedulesList").innerHTML = `
+    <div class="empty-state">
       <div class="empty-state-icon">⏳</div>
       <div class="empty-state-title">Loading...</div>
     </div>`;
 
         try {
-          const r = await api("GET", "/admin/show-schedule");
-
-          console.log("API RESPONSE:", r);
+          const [scheduleRes, movieRes, screenRes] = await Promise.all([
+            api("GET", "/admin/show-schedule"),
+            api("GET", "/admin/movie"),
+            api("GET", "/admin/screen"),
+          ]);
 
           const schedules =
-            r.ok && Array.isArray(r.data?.data) ? r.data.data : [];
+            scheduleRes.ok && Array.isArray(scheduleRes.data?.data)
+              ? scheduleRes.data.data
+              : [];
 
+          const movieCount =
+            movieRes.ok && Array.isArray(movieRes.data?.data)
+              ? movieRes.data.data.length
+              : 0;
+
+          const screenCount =
+            screenRes.ok && Array.isArray(screenRes.data?.data)
+              ? screenRes.data.data.length
+              : 0;
+
+          document.getElementById("s_movies").textContent = movieCount;
           document.getElementById("s_schedules").textContent = schedules.length;
-          document.getElementById("s_movies").textContent = schedules.length;
-          // document.getElementById("s_screens").textContent = 5;
-          const uniqueScreens = [
-            ...new Set(
-              schedules.map(
-                (s) => s.screen?.name || s.screen?.screen_name || s.screenName,
-              ),
-            ),
-          ];
-
-          document.getElementById("s_screens").textContent =
-            uniqueScreens.length;
-
+          document.getElementById("s_screens").textContent = screenCount;
           document.getElementById("s_bookings").textContent = schedules.reduce(
             (a, s) => a + (s.bookedSeats?.length || 0),
             0,
           );
 
-          // ✅ if no data
           if (!schedules.length) {
             document.getElementById("dashSchedulesList").innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon">📋</div>
           <div class="empty-state-title">No schedules found</div>
-        </div>
-      `;
+        </div>`;
             return;
           }
 
@@ -762,43 +763,26 @@
           <div class="sched-time-badge">
             ${s.timesheet?.startTime || "10:00"}
           </div>
-
           <div class="sched-info">
-            <div class="sched-movie">
-              ${s.movie?.Name || "Movie"}
-            </div>
-
+            <div class="sched-movie">${s.movie?.Name || "Movie"}</div>
             <div class="sched-meta">
-              ${
-                s.screen?.name ||
-                s.screen?.screen_name ||
-                s.screenName ||
-                "Screen"
-              }.
-              ${s.date || "Today"} ·
-              ${s.bookedSeats?.length || 0}/
-              ${s.screen?.capacity || 120} seats booked
+              ${s.screen?.name || "Screen"} · 
+              ${s.date || "Today"} · 
+              ${s.bookedSeats?.length || 0}/${s.screen?.capacity || 120} seats booked
             </div>
           </div>
-
-          <div class="sched-price">
-            ₹${s.price || 250}
-          </div>
-
+          <div class="sched-price">₹${s.price || 250}</div>
           <span class="pill pill-green">Active</span>
-        </div>
-      `,
+        </div>`,
             )
             .join("");
         } catch (error) {
           console.error(error);
-
           document.getElementById("dashSchedulesList").innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">❌</div>
         <div class="empty-state-title">Failed to load data</div>
-      </div>
-    `;
+      </div>`;
         }
       }
 
