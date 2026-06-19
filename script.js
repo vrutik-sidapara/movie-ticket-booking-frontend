@@ -216,6 +216,10 @@ function openAuthModal(tab = "login") {
           <label class="form-label">Password</label>
           <input type="password" id="regPass" class="form-input" placeholder="Min 8 characters"/>
         </div>
+        <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input type="password" id="regConfirmPass" class="form-input" placeholder="Confirm your password"/>
+        </div>
         <button class="btn-submit" id="regSubmitBtn" onclick="doRegister()">CREATE ACCOUNT →</button>
         <p style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center">
           A verification email will be sent to your inbox.
@@ -288,11 +292,18 @@ async function doRegister() {
   const username = document.getElementById("regName")?.value?.trim();
   const email = document.getElementById("regEmail")?.value?.trim();
   const password = document.getElementById("regPass")?.value;
+  const confirmPass = document.getElementById("regConfirmPass")?.value;
 
-  if (!username || !email || !password) {
+  if (!username || !email || !password || !confirmPass) {
     showToast("Please fill all fields", "error");
     return;
   }
+
+  if (password !== confirmPass) {
+    showToast("Passwords do not match", "error");
+    return;
+  }
+
   if (password.length < 8) {
     showToast("Password must be at least 8 characters", "error");
     return;
