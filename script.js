@@ -453,4 +453,40 @@ function initShared() {
     window.location.href = "index.html";
     return;
   }
+
+  // ✅ Auto-logout when JWT expires (24h)
+  checkTokenExpiry();
+}
+
+function checkTokenExpiry() {
+  const token = Auth.token();
+  if (!token) return;
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const expiryTime = payload.exp * 1000;
+    const now = Date.now();
+
+    if (now >= expiryTime) {
+      Auth.clear();
+      showToast("Session expired. Please login again.", "info");
+      renderNav();
+      return;
+    }
+
+    const timeRemaining = expiryTime - now;
+    setTimeout(() => {
+      Auth.clear();
+      showToast("Session expired. Please login again.", "info");
+      renderNav();
+      if (
+        window.location.pathname.includes("admin.html") ||
+        window.location.pathname.includes("superadmin.html")
+      ) {
+        window.location.href = "index.html";
+      }
+    }, timeRemaining);
+  } catch (err) {
+    Auth.clear();
+  }
 }
