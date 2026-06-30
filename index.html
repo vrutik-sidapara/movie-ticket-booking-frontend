@@ -1407,6 +1407,26 @@
       initShared();
       renderNav();
       loadMovies();
+
+      // ✅ Handle email verification redirect
+      (function handleVerifyRedirect() {
+        const params = new URLSearchParams(window.location.search);
+        const verified = params.get("verified");
+        if (verified === "true") {
+          showToast("Email verified! You can now log in. ✅", "success");
+          openAuthModal("login");
+        } else if (verified === "false") {
+          showToast("Verification link is invalid or expired. ❌", "error");
+        }
+        if (verified !== null) {
+          // URL clean karo jethi refresh par toast pacho na aave
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
+        }
+      })();
     </script>
   </body>
 </html>
