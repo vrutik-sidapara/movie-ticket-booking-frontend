@@ -1412,14 +1412,21 @@
       (function handleVerifyRedirect() {
         const params = new URLSearchParams(window.location.search);
         const verified = params.get("verified");
+        const verifiedEmail = params.get("email");
+
         if (verified === "true") {
           showToast("Email verified! You can now log in. ✅", "success");
           openAuthModal("login");
+          if (verifiedEmail) {
+            setTimeout(() => {
+              const loginEmail = document.getElementById("loginEmail");
+              if (loginEmail) loginEmail.value = verifiedEmail;
+            }, 50);
+          }
         } else if (verified === "false") {
           showToast("Verification link is invalid or expired. ❌", "error");
         }
         if (verified !== null) {
-          // URL clean karo jethi refresh par toast pacho na aave
           window.history.replaceState(
             {},
             document.title,
