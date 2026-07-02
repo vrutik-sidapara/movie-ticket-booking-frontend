@@ -200,6 +200,11 @@ function openAuthModal(tab = "login") {
           </div>
         </div>
         <button class="btn-submit" id="loginSubmitBtn" onclick="doLogin()">SIGN IN →</button>
+  
+        <p id="resendVerifyWrap" style="display:none;font-size:13px;color:var(--muted);margin-top:14px;text-align:center">
+        Didn't get the email?
+        <a href="#" id="resendVerifyLink" onclick="doResendVerification(event)" style="color:var(--red);font-weight:600;text-decoration:none">Resend verification email</a>
+        </p>
       </div>
 
       <!-- REGISTER -->
@@ -264,6 +269,9 @@ async function doLogin() {
     return;
   }
 
+  const resendWrap = document.getElementById("resendVerifyWrap");
+  if (resendWrap) resendWrap.style.display = "none";
+
   setLoading("loginSubmitBtn", true, "Signing in...");
   const r = await api("POST", "/auth/login", { email, password });
   setLoading("loginSubmitBtn", false);
@@ -272,7 +280,7 @@ async function doLogin() {
     Auth.set({
       token: r.data.token,
       user: {
-        name: r.data.user.username, // ✅ backend sends "username" not "name"
+        name: r.data.user.username,
         email: r.data.user.email,
         role: r.data.user.role,
         id: r.data.user.id,
@@ -283,8 +291,38 @@ async function doLogin() {
     renderNav();
     setTimeout(() => window.location.reload(), 500);
   } else {
-    // ✅ shows "Please verify your email" from your backend directly
     showToast(r.error || "Login failed", "error");
+
+    if (r.error && r.error.toLowerCase().includes("verify") && resendWrap) {
+      resendWrap.style.display = "block";
+      resendWrap.dataset.email = email;
+    }
+  }
+}
+
+async function doResendVerification(e) {
+  e.preventDefault();
+  const resendWrap = document.getElementById("resendVerifyWrap");
+  const email = resendWrap?.dataset.email;
+
+  if (!email) {
+    showToast("Please enter your email first", "error");
+    return;
+  }
+
+  const link = document.getElementById("resendVerifyLink");
+  const originalText = link.textContent;
+  link.textContent = "Sending...";
+
+  const r = await api("POST", "/auth/resend-verification", { email });
+
+  link.textContent = originalText;
+
+  if (r.ok) {
+    showToast("Verification email sent! Check your inbox 📧", "success");
+    resendWrap.style.display = "none";
+  } else {
+    showToast(r.error || "Failed to resend email", "error");
   }
 }
 
